@@ -72,10 +72,11 @@ function leoModel() {
 		count_of_right_read_action,
 		max_lag_of_performance_of_read_request,
 		max_lag_of_performance_for_gateway_nodes,
+        ymax_lag_of_performance_of_read_request,
 		interval_for_repair,
 		level_of_intensivity_of_requests,
 	    count_of_iterations_for_algorithm,
-		k, n, r, rr, c, j, g, d, b, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
+		k, n, r, rr, c, j, g, d, b, y, y1, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
 
 		rem, //array of arrays:rem[i][j] - variations( for: performance time (i=0), resources (i=1), probabilities (i=2)), which are depend from  level remoteness (transcontinental(j=4), great (j=3), middle (j=2), local (j=1)).
         matrix, //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
@@ -141,6 +142,7 @@ function leoModel() {
 	count_of_wrong_read_request = 0;
 	max_lag_of_performance_of_read_request = 0;
 	max_lag_of_performance_for_gateway_nodes = 0;
+    ymax_lag_of_performance_of_read_request = [0, 0, 0, 0, 0];
 	level_of_intensivity_of_requests = document.getElementById("fname12").value || 20;("par12").innerHTML;
     count_of_iterations_for_algorithm = document.getElementById("fname5").value || 100;("par5").innerHTML;
     interval_for_repair = document.getElementById("fname10").value || 25; //("par10").innerHTML;
@@ -156,7 +158,7 @@ function leoModel() {
      cluster = [];
 	    
     for (k = 1; k <=  count_of_nodes; k++) {
-        cluster.push(['node_' + k, 1, {}, 0, {}, 0, k]);
+        cluster.push(['node_' + k, 1, {}, 0, {}, 0, k, 0]);
     }
     if ( count_of_gateway_nodes > count_of_nodes) {
         count_of_gateway_nodes = count_of_nodes;
@@ -198,7 +200,7 @@ function leoModel() {
     L = 0; M = 0; G = 0; Int = 0;
 
 
-//console.log(matrix[count_of_nodes -1][21], rem_type);  
+console.log(matrix, rem_type);  
     rem = [[]];
     for (i=0; i <= 2; i++) {
         rem[i] = [];
@@ -286,9 +288,14 @@ function leoModel() {
         current_action = randomElection(actions , probabilities_of_actions ); //random election of action.
 
         gtw_curr_nod = randomElectAndDeleteItem(gateway_cluster);//Gateway operation with write request(begin).
-        gtw_curr_nod[0][5] = Math.max(gtw_curr_nod[0][5], t) + count_of_time_for_performance_local_action_with_meta_data;
-        max_lag_of_performance_for_gateway_nodes = gtw_curr_nod[0][5] - t;
-		gw = gtw_curr_nod[0][5] - t;
+        gtw_curr_nod[0][7] = Math.max(gtw_curr_nod[0][7], t) + count_of_time_for_performance_local_action_with_meta_data;
+        for (k in cluster) {
+            if (cluster[k][6] == gtw_curr_nod[0][6]) {
+                cluster[k][5] =  Math.max(cluster[k][5], gtw_curr_nod[0][7]);
+            }
+        }
+        max_lag_of_performance_for_gateway_nodes = gtw_curr_nod[0][7] - t;
+		gw = gtw_curr_nod[0][7] - t;
         gateway_cluster = gateway_cluster.concat(gtw_curr_nod); //Gateway operation with write request(finish). 
 		 
 // iteration's part, write action:
@@ -349,8 +356,28 @@ function leoModel() {
                 }else{ 
                      curr_nod = randomElectAndDeleteItem(cluster);
                 }
-                
                 switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
+                                case 1:
+                                    L++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = L; 
+                                    break;
+                                case 2:
+                                    M++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = M; 
+                                    break;
+                                case 3:
+                                    G++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = G;
+                                    break;
+                                case 4:
+                                    Int++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = Int;  
+                            }   
+               /* switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
                                 case 1:
                                     L++; 
                                     break;
@@ -362,7 +389,7 @@ function leoModel() {
                                     break;
                                 case 4:
                                     Int++;
-                            } 
+                            }*/ 
                 if (rem_type) {
                     dist_of_pair = [rem[0][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[1][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[2][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]]];
                 }
@@ -377,7 +404,8 @@ function leoModel() {
 							    if (randomElection([1, 0], [1 - p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3], p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3]])) {
                             curr_nod[0][2][key_of_bucket_or_needle] = t + '_' + u; //current_bucket_or_needle, put new Riak objeckt, or fresh information with same key value.
 			                curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
-							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][7], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+                            ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
 							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 							change_gossip_protocol.push([curr_nod[0][0], 10, t +'_' + u]);//succesful write action for node.
 							gossip_protocol[2][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit at ' + t +'_' + u +'( < w_value ) value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
@@ -398,7 +426,8 @@ function leoModel() {
 								rr = rr + 1;
 								r = r + 1; //p = p + 1;
                                 c = c + 1
-                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][7], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+                                ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
 							    total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 							    change_gossip_protocol.push([curr_nod[0][0], 10, t +'_' + u]);//succesful write action for node.
 								change_gossip_protocol.push([curr_nod[0][0], 11, 0, t + '_' + u])
@@ -422,7 +451,7 @@ function leoModel() {
 							}
 			            } else {
 						
-							r = r + 1;
+							r = r + 1; 
 							curr_nod[0][1] = 0; // set 0 for the work_status node_j.
 							if(gossip_protocol[1][key_of_bucket_or_needle]) {
 							gossip_protocol[1][key_of_bucket_or_needle].push([curr_nod[0][0], 12, 'write_fall-' + t + u]);
@@ -431,7 +460,7 @@ function leoModel() {
 							gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'write_fall: value - ' + t + '_' + u + ' at ' + curr_nod[0][0] + ' and ';
 							gossip_protocol[9][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit at '+ t +'_' + u +'(write_fall), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
 							gossip_protocol[10][key_of_bucket_or_needle][curr_nod[0][0]] = ['start: write_failure! value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -', curr_nod[0][5], [-t, u], '-pair: write_fall--value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ];
-                           // }
+                           ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
 							                                
                             curr_nod[0][2][key_of_bucket_or_needle] = t //current_bucket_or_needle, put new Riak objeckt
 			                curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
@@ -444,7 +473,7 @@ function leoModel() {
                         }
                     }else{
                         gossip_protocol[9][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit at '+ t +'_' + u +'(send_failure), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
-							
+						ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;	
                         gossip_protocol[2][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit at '+ t +'_' + u +'(send_failure), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
                         gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'send_failure: value - ' + t + '_' + u + ' at ' + curr_nod[0][0] + ' and '; 
                         		                
@@ -459,7 +488,7 @@ function leoModel() {
                 }else{
                     
 				    gossip_protocol[10][key_of_bucket_or_needle][curr_nod[0][0]] = ['start; status_failure! value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], '-pair:( satus_failure!) value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ];
-                    
+                    ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
                     gossip_protocol[9][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit at ' + t +'_' + u +'-(status_failure), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]]; 
 					
                     gossip_protocol[2][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit at ' + t +'_' + u +'-(status_failure), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
@@ -520,16 +549,24 @@ function leoModel() {
 				}
                 switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
                                 case 1:
-                                    L++; 
+                                    L++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = L; 
                                     break;
                                 case 2:
                                     M++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = M; 
                                     break;
                                 case 3:
                                     G++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = G;
                                     break;
                                 case 4:
                                     Int++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = Int;  
                             }   
                 if (rem_type) {
                     dist_of_pair = [rem[0][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[1][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[2][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]]];
@@ -545,7 +582,8 @@ function leoModel() {
 							if (randomElection([1, 0], [1 - p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3], p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3]])) {
                             curr_nod[0][2][key_of_bucket_or_needle] = t + '_' + u; //current_bucket_or_needle, put new Riak objeckt, or fresh information with same key value.
 			                curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
-							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][7], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+                            ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
 							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 							change_gossip_protocol.push([curr_nod[0][0], 20, t +'_' + u]);//succesful write action for node.
                             gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and-', curr_nod[0][5], [t, u]];
@@ -575,8 +613,9 @@ function leoModel() {
 								rr = rr + 1;
 								r = r + 1;
                                 c = c + 1; 
-                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
-							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
+                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][7], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+							    ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
+                                total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 								change_gossip_protocol.push([curr_nod[0][0], 21, 0, t + '_' + u])
 								if(gossip_protocol[1][key_of_bucket_or_needle]) {
 								gossip_protocol[1][key_of_bucket_or_needle].push([curr_nod[0][0], 21, t + '_' + u]);
@@ -613,9 +652,9 @@ function leoModel() {
 							gossip_protocol[1][key_of_bucket_or_needle].push([curr_nod[0][0], 22, t + u + 'write_fall']);
 							}
                             gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'write_fall : value - ' + t + '_' + u + ' at ' + curr_nod[0][0] + ' and ';
-							//if(gossip_protocol[10][key_of_bucket_or_needle] && gossip_protocol[10][key_of_bucket_or_needle][nod]) {			
+							ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;		
 							gossip_protocol[10][key_of_bucket_or_needle][nod] = [gossip_protocol[10][key_of_bucket_or_needle][nod]+ ' write_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-', curr_nod[0][5], [-t, u], gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: (write_failue)-' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-'];
-                            //}
+                            
 							gossip_protocol[2][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + ' no commit at ' + t +'_' + u +'-( write_failue), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], 0];
                              gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + ' no commit at ' + t +'_' + u +'-( write_failue), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], 0];
                             curr_nod[0][2][key_of_bucket_or_needle] = t //current_bucket_or_needle, put new Riak objeckt
@@ -636,7 +675,7 @@ function leoModel() {
                          }*/
                         gossip_protocol[2][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + ' no commit at ' + t +'_' + u +'-(send_failure ), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], 0];
                         gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + ' no commit at ' + t +'_' + u +'-(send_failure ), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
-						
+						ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
 
                         gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'send_failure : value - ' + t + '_' + u + ' at ' + curr_nod[0][0] + ' and ';   
 		                //c = c - 1;
@@ -654,7 +693,7 @@ function leoModel() {
                     
                     gossip_protocol[2][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + ' no commit at ' + t +'_' + u +'-(status_failure ), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], 0];
                     gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + ' no commit at ' + t +'_' + u +'-(status_failure ), value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]]; 
-					
+					ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + curr_nod[0][5] - t)/ y1;
 
                     gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'status_fall: value - ' + t + '_' + u + ' at ' + curr_nod[0][0] + ' and '; 
 				    if(gossip_protocol[1][key_of_bucket_or_needle]) {
@@ -707,23 +746,32 @@ function leoModel() {
                         if (cluster[n][0] === buck) {
                             switch (matrix[cluster[n][6]][gtw_curr_nod[0][6]]) {
                                 case 1:
-                                    L++; 
+                                    L++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = L; 
                                     break;
                                 case 2:
                                     M++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = M;
                                     break;
                                 case 3:
                                     G++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = G;
                                     break;
                                 case 4:
                                     Int++;
+                                    y = matrix[curr_nod[0][6]][gtw_curr_nod[0][6]];
+                                    y1 = Int;
                             } 
   
                             if (rem_type) {
                                 dist_of_pair = [rem[0][matrix[cluster[n][6]][gtw_curr_nod[0][6]]], rem[1][matrix[cluster[n][6]][gtw_curr_nod[0][6]]], rem[2][matrix[cluster[n][6]][gtw_curr_nod[0][6]]]];
                             }                             
-                            cluster[n][5] = Math.max(cluster[n][5], gtw_curr_nod[0][5], t) +  use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4];//time for performance local action.
+                            cluster[n][5] = Math.max(cluster[n][5], gtw_curr_nod[0][7], t) +  use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4];//time for performance local action.
 							max_lag_of_performance_of_read_request = Math.max(max_lag_of_performance_of_read_request, cluster[n][5] - t);
+                            ymax_lag_of_performance_of_read_request[y] = (ymax_lag_of_performance_of_read_request[y] * (y1 - 1) + cluster[n][5] - t)/ y1;
 							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,cluster[n][5]);
 							gossip_protocol[6][key_of_bucket_or_needle].push([cluster[n][0], cluster[n][5], current_bucket_or_needle[0], t + '_' + u]);
 							time = cluster[n][5];
@@ -894,7 +942,7 @@ total_used_resource = total_used_resource + total_use_of_resource_by_repair_acti
 		
 	    "count_of_read//write_actions - " + count_of_iterations_for_algorithm * level_of_intensivity_of_requests
 		]);*/
-     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
+     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w, ymax_lag_of_performance_of_read_request);
    
 return [(total_count_of_data / total_used_resource).toFixed(3), (((count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests)) * 100).toFixed(3),  (((count_of_right_read_action - count_of_read_lags) / count_of_right_read_action) * 100).toFixed(3), total_count_of_data.toPrecision(4), total_used_resource.toPrecision(4), total_count_of_failures, count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request.toFixed(3), count_of_iterations_for_algorithm * level_of_intensivity_of_requests, gw]    
 }

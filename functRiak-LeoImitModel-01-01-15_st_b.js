@@ -831,7 +831,7 @@ function riakModel() {
         }else{
 			count_of_right_read_action = count_of_right_read_action + 1;
 			if (count_of_iterations_for_algorithm * level_of_intensivity_of_requests < 101) {
-console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
+//console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
             }
 			if (s2 < 1 ) {
                 
@@ -871,7 +871,7 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
 		
 	    "count_of_read//write_actions - " + count_of_iterations_for_algorithm * level_of_intensivity_of_requests
 		]);*/
-     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
+    // console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
    
 return [(total_count_of_data / total_used_resource).toFixed(3), (((count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests)) * 100).toFixed(3),  (((count_of_right_read_action - count_of_read_lags) / count_of_right_read_action) * 100).toFixed(3), total_count_of_data.toPrecision(4), total_used_resource.toPrecision(4), total_count_of_failures, count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request.toFixed(3), count_of_iterations_for_algorithm * level_of_intensivity_of_requests, w]    
 }
