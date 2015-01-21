@@ -1,4 +1,86 @@
+
 //Algorithm  for  an Imitation model for Leo system.
+/*var count_of_nodes,
+        count_of_gateway_nodes,
+	    key_of_bucket_or_needle, //key_bucket(key of needle) = 'kt_u' = 'k' + t + '_' + u,where t,u - integer.
+		value_of_Riak_object, // context of write request (really - numbers of  steps of iteration   with write_action in format: "t_u"; or "0" (for outdated information).
+		
+        metaRiak_objects, // = [[type of Riak object, data size of Riak object in conditional units,  value_of_Riak_object, coefficient  for probability of failure for this type, time size of Riak object in conditional units],...], type may be: "text", "foto","vidio", or others, example: [["text", 0.01, value_of_Riak_object, 0,1, 0.001], ["foto", 2, value_of_Riak_object, 1, 0.1], ["vidio", 50, value_of_Riak_object, 5, 1]] .
+        probabilities_selectings_of_metaRiak_objects, // example: [0.5, 0.3, 0.2].
+		current_bucket_or_needle, // element (item) of metaRiak_objects.
+		obj_current, //dictionary(for current pars "key:value" (Riak objects)): {key_of_bucket_or_needle:current_bucket_or_needle}.
+		
+	    n_value, //the datum will replicated to "n_value" separated partitions of the Riak Ring("n_value" copies will be stored at different servers(nodes)).
+        w_value,//min number for write copies.
+        r_value, //min number for read copies.
+        
+        
+        list_of_entering_keys,
+        total_time_of_finish_performance_actions_at_node,
+		gossip_protocol,
+        count_of_data_in_node,
+        cluster, //= [[node_i(name(number) of node(server), i - integer),  working_status(1 - working server, 0 - failure), {key_of_bucket_or_needle:Riak_object_value}, count_of_data_in_node, total_time_of_finish_performence_actions_at_node, i],...].
+        gateway_cluster, 
+		clusterForKey,
+		value_of_UpdataForCurrRiak_object,
+		
+   
+        write_action,
+        p_of_write_action, //probability of failure for action, which performs  with a  cond. unit of data.
+        use_of_resource_by_write_action, //resource for performing action with	conditional unit of data.
+        probOfGetNewKeyInWriteReqwest,		
+		metaDataForKey,
+	    read_action,
+        p_of_read_action,   //so on ...
+        use_of_resource_by_read_action,
+	  
+	    send_action,
+        p_of_send_action,    //so on ...
+        use_of_resource_by_send_action,
+		use_time_for_performance_send_net_action_with_one_cond_unit_of_data, //in conditional time units.
+	    
+		p_of_local_failure,//lag of Riak object.
+		use_time_for_performance_local_action_with_one_cond_unit_of_data, //in conditional time units.
+		count_of_time_for_performance_local_action_with_meta_data, //for service system.
+		
+		time_for_performance_repair_action,
+		
+        storage_action,
+        p_of_storage_action,
+        use_of_resource_by_storage_action,
+	   
+	    use_of_resource_for_seaching_one_Riak_object_at_one_node,
+		
+	    total_count_of_data, // in all servers,
+	    total_used_resource,
+		total_time_of_finish_imitatiion,
+        total_use_of_resource_by_write_action,
+        total_use_of_resource_by_read_action,
+        total_use_of_resource_by_send_action,
+	    total_count_of_failures,//net's  partitions,  failures of  equipment.
+	    count_of_read_lags,//cases of outdated information.
+	    count_of_read_failures,// failures with   requests  for getting data, decreasing of the availability.
+		count_of_write_failures,
+        count_of_failures_for_write_action,
+		count_of_right_write_action,
+        count_of_failures_for_send_action,
+        count_of_failures_for_read_action,
+		count_of_local_failure,
+		count_of_right_read_action,
+		max_lag_of_performance_of_read_request,
+		max_lag_of_performance_for_gateway_nodes,
+        ymax_lag_of_performance_of_read_request,
+		interval_for_repair,
+		level_of_intensivity_of_requests,
+	    count_of_iterations_for_algorithm,
+		k, n, r, rr, c, j, g, d, b, y, y1, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
+
+		rem, //array of arrays:rem[i][j] - variations( for: performance time (i=0), resources (i=1), probabilities (i=2)), which are depend from  level remoteness (transcontinental(j=4), great (j=3), middle (j=2), local (j=1)).
+        matrix; //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.*/
+
+		
+		
+
 function leoModel() {
 
 // declaration  part:
@@ -79,7 +161,7 @@ function leoModel() {
 		k, n, r, rr, c, j, g, d, b, y, y1, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
 
 		rem, //array of arrays:rem[i][j] - variations( for: performance time (i=0), resources (i=1), probabilities (i=2)), which are depend from  level remoteness (transcontinental(j=4), great (j=3), middle (j=2), local (j=1)).
-        matrix, //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
+        matrix; //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
 
 		
 		
@@ -89,7 +171,7 @@ function leoModel() {
     send_action = 'send';
     actions = [write_action, read_action];
 	probabilities_of_actions = [0.5, 0.5];
-	probOfGetNewKeyInWriteReqwest = 0.15;
+	probOfGetNewKeyInWriteReqwest = 0.75;
 	
 	p_of_write_action = document.getElementById("fname1").value || 0.01; //("par1").innerHTML; //a probability of  a failure for a write_action, when it is performing with one cond. unit of data.Not more than 0.3
 	use_of_resource_by_write_action = 1; //resource for performing action with one conditional unit of data).
@@ -137,13 +219,13 @@ function leoModel() {
 	count_of_local_failure = 0;
     count_of_read_failures = 0;
     count_of_write_failures = 0;
-	count_of_right_read_action = 0;
+	count_of_right_read_action = 0.01;
 	count_of_right_write_action = 0;
 	count_of_wrong_read_request = 0;
 	max_lag_of_performance_of_read_request = 0;
 	max_lag_of_performance_for_gateway_nodes = 0;
-	level_of_intensivity_of_requests = document.getElementById("fname12").value || 20;("par12").innerHTML;
-    count_of_iterations_for_algorithm = document.getElementById("fname5").value || 100;("par5").innerHTML;
+	level_of_intensivity_of_requests = document.getElementById("fname12").value || 20;//("par12").innerHTML;
+    count_of_iterations_for_algorithm = document.getElementById("fname5").value || 100;//("par5").innerHTML;
     interval_for_repair = document.getElementById("fname10").value || 25; //("par10").innerHTML;
     list_of_entering_keys = []; //['start'];
 	value_of_UpdataForCurrRiak_object = ['value =', 'type ='];
@@ -159,16 +241,18 @@ function leoModel() {
     for (k = 1; k <=  count_of_nodes; k++) {
         cluster.push(['node_' + k, 1, {}, 0, {}, 0, k, 0]);
     }
-    if ( count_of_gateway_nodes > count_of_nodes) {
-        count_of_gateway_nodes = count_of_nodes;
-    }
-	for (k = 1; k <= count_of_gateway_nodes; k++) {
-
-        gateway_cluster.push(cluster[(Math.floor(count_of_nodes/count_of_gateway_nodes) * k) - 1]);
-
-    }
-
-
+    /*if ( count_of_gateway_nodes > count_of_nodes) {
+       for (k = 1; k <=  count_of_nodes; k++) {
+        gateway_cluster.push(['node_' + k, 1, {}, 0, {}, 0, k, 0]);
+        }     //  count_of_gateway_nodes = count_of_nodes;
+    }else{*/
+	for (i = 1; i <= count_of_gateway_nodes; i++) {
+        
+        gateway_cluster.push(cluster[Math.floor(count_of_nodes/count_of_gateway_nodes) * i - 1]); //Math.floor(count_of_nodes/count_of_gateway_nodes) * k) - 1
+    }    
+    
+//alert(7 + gateway_cluster);
+//console.log(gateway_cluster, cluster, count_of_gateway_nodes ,'con1L');
     matrix = [[]];
     switch (rem_type) {
         case "1": 
@@ -209,8 +293,8 @@ function leoModel() {
         }
     }
     dist_of_pair = [0, 1, 1];
-    bound = 1; 
-//console.log(rem[0][3]);  
+    bound = document.getElementById("fname2").value || 1; 
+ //console.log(bound);  
 	
 	
 //part for function's definitions:
@@ -285,18 +369,16 @@ function leoModel() {
 		u = u + 1;
 		
         current_action = randomElection(actions , probabilities_of_actions ); //random election of action.
-
         gtw_curr_nod = randomElectAndDeleteItem(gateway_cluster);//Gateway operation with write request(begin).
         gtw_curr_nod[0][7] = Math.max(gtw_curr_nod[0][7], t) + count_of_time_for_performance_local_action_with_meta_data;
         for (k in cluster) {
-            if (cluster[k][6] == gtw_curr_nod[0][6]) {
+            if (cluster[k][0] == gtw_curr_nod[0][0]) {
                 cluster[k][5] =  Math.max(cluster[k][5], gtw_curr_nod[0][7]);
             }
         }
         max_lag_of_performance_for_gateway_nodes = gtw_curr_nod[0][7] - t;
 		gw = gtw_curr_nod[0][7] - t;
         gateway_cluster = gateway_cluster.concat(gtw_curr_nod); //Gateway operation with write request(finish). 
-		 
 // iteration's part, write action:
 	     
 	      
@@ -337,6 +419,7 @@ function leoModel() {
                 a = 0;
 		        r = 0;
                 j = 0;
+//alert(gtw_curr_nod[0]);				
         while (j < n_value) {
             j = j + 1;
                 if (bound < 10) { 
@@ -355,6 +438,7 @@ function leoModel() {
                 }else{ 
                      curr_nod = randomElectAndDeleteItem(cluster);
                 }
+//alert(curr_nod[0]);				
                 switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
                                 case 1:
                                     L++;
@@ -815,8 +899,7 @@ function leoModel() {
 		    count_of_read_failures = count_of_read_failures + 1;// loss of availability.
         }else{
 			count_of_right_read_action = count_of_right_read_action + 1;
-			if (count_of_iterations_for_algorithm * level_of_intensivity_of_requests < 101) {
-console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
+//console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
             }
 			if (s2 < 1 ) {
                 
@@ -829,7 +912,7 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
 			time = undefined;
 			inform = undefined;
 		}
-}
+
 		 if (t % interval_for_repair == interval_for_repair - 1) { 
 		            w++;
 					for (x in gossip_protocol[10]) {
@@ -936,7 +1019,7 @@ total_used_resource = total_used_resource + total_use_of_resource_by_repair_acti
 		
 	    "count_of_read//write_actions - " + count_of_iterations_for_algorithm * level_of_intensivity_of_requests
 		]);*/
-     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
+     //console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
    
 return [(total_count_of_data / total_used_resource).toFixed(3), (((count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests)) * 100).toFixed(3),  (((count_of_right_read_action - count_of_read_lags) / count_of_right_read_action) * 100).toFixed(3), total_count_of_data.toPrecision(4), total_used_resource.toPrecision(4), total_count_of_failures, count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request.toFixed(3), count_of_iterations_for_algorithm * level_of_intensivity_of_requests, gw]    
 }
@@ -1018,10 +1101,10 @@ function RiakModel() {
 		interval_for_repair,
 		level_of_intensivity_of_requests,
 	    count_of_iterations_for_algorithm,
-		k, n, r, rr, c, j, g, d, b, y, y1, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
+		k, n, r, rr, c, j, g, d, b, m, y, y1, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
 
 		rem, //array of arrays:rem[i][j] - variations( for: performance time (i=0), resources (i=1), probabilities (i=2)), which are depend from  level remoteness (transcontinental(j=4), great (j=3), middle (j=2), local (j=1)).
-        matrix, //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
+        matrix; //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
 
 		
 		
@@ -1031,7 +1114,7 @@ function RiakModel() {
     send_action = 'send';
     actions = [write_action, read_action];
 	probabilities_of_actions = [0.5, 0.5];
-	probOfGetNewKeyInWriteReqwest = 0.15;
+	probOfGetNewKeyInWriteReqwest = 0.75;
 	
 	p_of_write_action = document.getElementById("fname1").value || 0.01; //("par1").innerHTML; //a probability of  a failure for a write_action, when it is performing with one cond. unit of data.Not more than 0.3
 	use_of_resource_by_write_action = 1; //resource for performing action with one conditional unit of data).
@@ -1058,7 +1141,7 @@ function RiakModel() {
 	obj_current = {start:['start', 0.001, 0.55, 0.1, 0.201]};
 	use_of_resource_for_seaching_one_Riak_object_at_one_node = 0.1;
 	count_of_nodes = document.getElementById("fname15").value || 50;//("par15").innerHTML; 
-    count_of_gateway_nodes = document.getElementById("fname16").value || count_of_nodes;//("par16").innerHTML;     
+    count_of_gateway_nodes = count_of_nodes;//document.getElementById("fname16").value || count_of_nodes;//("par16").innerHTML;     
 
     n_value = document.getElementById("fname7").value || 3; //("par7").innerHTML;
     w_value = document.getElementById("fname8").value || 2;//("par8").innerHTML;
@@ -1079,11 +1162,11 @@ function RiakModel() {
 	count_of_local_failure = 0;
     count_of_read_failures = 0;
     count_of_write_failures = 0;
-	count_of_right_read_action = 0;
+	count_of_right_read_action = 0.01;
 	count_of_right_write_action = 0;
 	count_of_wrong_read_request = 0;
 	max_lag_of_performance_of_read_request = 0;
-	max_lag_of_performance_for_gateway_nodes = 0;
+	//max_lag_of_performance_for_gateway_nodes = 0;
 	level_of_intensivity_of_requests = document.getElementById("fname12").value || 20;("par12").innerHTML;
     count_of_iterations_for_algorithm = document.getElementById("fname5").value || 100;("par5").innerHTML;
     interval_for_repair = document.getElementById("fname10").value || 25; //("par10").innerHTML;
@@ -1093,23 +1176,16 @@ function RiakModel() {
 	clusterForKey = {};
 	valueOfRiakObj = [];
 	
-	gateway_cluster = [];
-
 	gossip_protocol =[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
      cluster = [];
 	    
     for (k = 1; k <=  count_of_nodes; k++) {
         cluster.push(['node_' + k, 1, {}, 0, {}, 0, k, 0]);
     }
-    if ( count_of_gateway_nodes > count_of_nodes) {
-        count_of_gateway_nodes = count_of_nodes;
+    gateway_cluster = [];
+	for (k = 1; k <=  count_of_nodes; k++) {
+        gateway_cluster.push(['node_' + k, 1, {}, 0, {}, 0, k, 0]);
     }
-	for (k = 1; k <= count_of_gateway_nodes; k++) {
-
-        gateway_cluster.push(cluster[(Math.floor(count_of_nodes/count_of_gateway_nodes) * k) - 1]);
-
-    }
-
 
     matrix = [[]];
     switch (rem_type) {
@@ -1146,12 +1222,12 @@ function RiakModel() {
     for (i=0; i <= 2; i++) {
         rem[i] = [];
         for (j = 1; j <= 4; j++) {
-        rem[i][j] = (1 + j/10) * (0.1 + i);
+        rem[i][j] = (1 + j/5) * (0.1 + i);
 //console.log(rem[i][j]); 
         }
     }
     dist_of_pair = [0, 1, 1];
-    bound = 1; 
+    bound = document.getElementById("fname2").value || 1;  
 //console.log(rem[0][3]);  
 	
 	
@@ -1192,6 +1268,8 @@ function RiakModel() {
 	
 // iteration's part, beginning:
     var current_node,
+	    curr_ar,
+		curr_nod,
         obj_current,
 		gossip_protocol_repair,
         current_bucket_or_needle,
@@ -1205,11 +1283,11 @@ function RiakModel() {
         i_min,
         w_ac,
         gw, //total dilay for performance time for gtw 
-		t, m, w, v, v1, u, l, a;
+		t, m, m1, w, v, v1, u, l, a;
    
     t = 0;
 	  
-    m = 0;
+    m1 = 0;
     
     w = 0;
 	v = 0;
@@ -1229,16 +1307,17 @@ function RiakModel() {
         current_action = randomElection(actions , probabilities_of_actions ); //random election of action.
 
         gtw_curr_nod = randomElectAndDeleteItem(gateway_cluster);//Gateway operation with write request(begin).
+//alert(cluster);		
         gtw_curr_nod[0][7] = Math.max(gtw_curr_nod[0][7], t) + count_of_time_for_performance_local_action_with_meta_data;
         for (k in cluster) {
             if (cluster[k][6] == gtw_curr_nod[0][6]) {
                 cluster[k][5] =  Math.max(cluster[k][5], gtw_curr_nod[0][7]);
             }
         }
-        max_lag_of_performance_for_gateway_nodes = gtw_curr_nod[0][7] - t;
+       // max_lag_of_performance_for_gateway_nodes = gtw_curr_nod[0][7] - t;
 		gw = gtw_curr_nod[0][7] - t;
         gateway_cluster = gateway_cluster.concat(gtw_curr_nod); //Gateway operation with write request(finish). 
-		 
+		//cluster = gateway_cluster; 
 // iteration's part, write action:
 	     
 	      
@@ -1279,6 +1358,7 @@ function RiakModel() {
                 a = 0;
 		        r = 0;
                 j = 0;
+//alert(gtw_curr_nod[0]);				
         while (j < n_value) {
             j = j + 1;
                 if (bound < 10) { 
@@ -1297,6 +1377,7 @@ function RiakModel() {
                 }else{ 
                      curr_nod = randomElectAndDeleteItem(cluster);
                 }
+//alert(curr_nod[0][0]);				
                 switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
                                 case 1:
                                     L++;
@@ -1441,7 +1522,11 @@ function RiakModel() {
                 }
 		        curr_ar = curr_ar.concat(curr_nod); 
 	        }
+//console.log(curr_nod, curr_ar, cluster);
+//alert(cluster);			
                 cluster = cluster.concat(curr_ar);
+//alert(cluster);
+//console.log(curr_nod, curr_ar,  cluster.concat(curr_ar));				
                  gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + '__NEXT--'; 
 				gossip_protocol[1][key_of_bucket_or_needle].push('change_gossip_protocol: ' + change_gossip_protocol);
                 if (c < w_value ) {
@@ -1758,7 +1843,7 @@ function RiakModel() {
         }else{
 			count_of_right_read_action = count_of_right_read_action + 1;
 			if (count_of_iterations_for_algorithm * level_of_intensivity_of_requests < 101) {
-console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
+//console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
             }
 			if (s2 < 1 ) {
                 
@@ -1782,10 +1867,10 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
 							 l = 0;
                             gossip_protocol[2][x] = {};
 					 while (l < w_value) {
-                   	m = (m + 1) % count_of_nodes;
-					cluster[m][5] = Math.max(cluster[m][5], t) + time_for_performance_repair_action;//time performance repair.
-					total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, cluster[m][5]);
-                    gossip_protocol[2][x][cluster[m][0]] = ['_' + t + '--' + u + '_re- ' + gossip_protocol[10][x][node][3], cluster[m][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]],1];
+                   	m1 = (m1 + 1) % (count_of_nodes - 3);
+					cluster[m1][5] = Math.max(cluster[m1][5], t) + time_for_performance_repair_action;//time performance repair.
+					total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, cluster[m1][5]);
+                    gossip_protocol[2][x][cluster[m1][0]] = ['_' + t + '--' + u + '_re- ' + gossip_protocol[10][x][node][3], cluster[m1][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]],1];
                     
 					//gossip_protocol_repair.push([cluster[m][0] , 1, gossip_protocol[4][x], "repair" + t]);
  		total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
@@ -1878,7 +1963,7 @@ total_used_resource = total_used_resource + total_use_of_resource_by_repair_acti
 		
 	    "count_of_read//write_actions - " + count_of_iterations_for_algorithm * level_of_intensivity_of_requests
 		]);*/
-     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
+    // console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, gateway_cluster, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
    
 return [(total_count_of_data / total_used_resource).toFixed(3), (((count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests)) * 100).toFixed(3),  (((count_of_right_read_action - count_of_read_lags) / count_of_right_read_action) * 100).toFixed(3), total_count_of_data.toPrecision(4), total_used_resource.toPrecision(4), total_count_of_failures, count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request.toFixed(3), count_of_iterations_for_algorithm * level_of_intensivity_of_requests, gw]    
 }

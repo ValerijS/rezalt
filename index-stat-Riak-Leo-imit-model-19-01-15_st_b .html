@@ -14,7 +14,7 @@
     Enter  a count_of_gateway_nodes- the count of nodes for entering (count_of_gateway_nodes <= count_of_nodes, default value - count_of_nodes): <input type="text" id="fname16" onchange = 'var c16 = document.getElementById("fname16").value;
    document.getElementById("par16-1").innerHTML =  "You have entered  the count of all nodes  = "+ c16'>
          <div id = 'par16-1'></div>
-      Enter  a count of Storage-nodes (servers)(default value- 40) : <input type="text" id="fname2" onchange = 'var c2 = document.getElementById("fname2").value;
+      Enter  a mode of choice optimal node(1 - switch on, 11 - switch off)(default - switch on) : <input type="text" id="fname2" onchange = 'var c2 = document.getElementById("fname2").value;
    document.getElementById("par2-1").innerHTML =  "You have entered  the count of Storage-nodes  = "+ c2'>
          <div id = 'par2-1'></div> 
 
@@ -58,7 +58,7 @@
      Enter  a count of iterations for the algorithm(default value- 100): <input type="text" id="fname5" onchange = 'var c5 = document.getElementById("fname5").value;
    document.getElementById("par5-1").innerHTML =  "You have entered  the count of iterations for algorithmcount  = "+ c5'>
    <div id = 'par5-1'></div>
-    capacity_of_statistical_sampling(default value- 20): <input type="text" id="fname13" onchange = 'var c13 = document.getElementById("fname13").value;
+    capacity_of_statistical_sampling(default value- 10): <input type="text" id="fname13" onchange = 'var c13 = document.getElementById("fname13").value;
    document.getElementById("par13-1").innerHTML =  "capacity_of_statistical_sampling = "+ c13'>
    <div id = 'par13-1'></div>
    
@@ -98,7 +98,7 @@ while (j < capacity_of_statistical_sampling) {
 document.getElementById("par14").innerHTML =  c14;	 
 var j, f_st, f_stL, stat1, statistic, statisticL; 
 j = 0;
-var capacity_of_statistical_sampling = document.getElementById("fname13").value ||1 
+var capacity_of_statistical_sampling = document.getElementById("fname13").value ||10 
 ; //(document.getElementById("par13").innerHTML == true) ? document.getElementById("par13").innerHTML:10;
 statistic = [0,0,0,0,0,0,0,0,0,0,0,0];
 while (j < capacity_of_statistical_sampling) { 

@@ -1,0 +1,165 @@
+                
+                 Report 19 The continuance of analysis of Riak and Leo systems.
+
+     Now we embed a remote factor into an imitation model. We consider matrix
+of levels remoteness, each its element (i,j) describes a remoteness node_i from node_j as one of four levels: local(L), middle(M), great(G) and transcontinental(Int). Each value of level remoteness defines amendments to time, probability of failure, and use of resource of transmission actions. 
+
+          For experiment, for first type of location (line), we will take  m(i,j) = Math.floor(((Math.abs(i – j) / count_of_nodes) * 4) + 1), for second  type (circl), we will take  m(i,j)  =  Math.floor((Math.min(Math.abs(i - j), count_of_nodes - Math.abs(i - j))/count_of_nodes) * 7) + 1.(Seven zones).
+There: if m(i,j) = 1, then it is L level; 2 - M level; 3 - G level, 4 - Int level.
+        
+     For (j = 1; j <= 4; j++) , and i = 0, 1, 2. We take: 
+ rem[i][j] = (1 + j/10) * (0.1 + i)  is an amendment to time of performance(i = 0), 
+ rem[i][j] = (1 + j/10) * (0.1 + i)  is  a coefficient for  a probability of failure (i = 1), 
+ rem[i][j] = (1 + j/10) * (0.1 + i)  is a coefficient for  using of resource  ( i = 2 ), -
+for the transmission of data in the dependence of the distance for levels: L(j = 1), M(j = 2), G(j = 3), Int(j = 4).
+     We will consider three modes:
+first - do not taking in account a distance between nodes;
+second - taking in account a distance between nodes, but without a choice the nearest node;
+third - with the choice the nearest and the most free according to performance time a node.
+   Let's make the statistical analysis.
+We will set a capacity of statistical sampling = 20, and will run  the imitation models of Riak and Leo systems in different modes and with different types of location.
+
+1. THE FIRST MODE
+      We will set next values for parameters in html file "index-...":
+
+      Enter a count of all nodes(default value- 50):  21
+You have entered the count of all nodes = 21
+Enter a count_of_gateway_nodes- the count of nodes for entering (count_of_gateway_nodes <= count_of_nodes, default value - count_of_nodes):  7
+You have entered the count of all nodes = 7
+Enter a mode of choice optimal node(1 - switch on, 11 - switch off)(default - switch on) :  11
+You have entered the count of Storage-nodes = 11
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) :  3
+You have entered the n_value = 3
+Enter w_walue(min number for write copies.)(default value- 2):  2
+You have entered the w_value = 2 2
+Enter a r_value(min number for read copies)(default value- 2):  2
+You have entered the r_value = 2
+Enter an interval_for_repair(default value- 25):  25
+You have entered the interval_for_repair = 25
+Fashion style varying distances between nodes(0-not used, 1-line, 2-circle; default value- 0):  0
+
+Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01):  0.1
+You have entered a probability of a failure for a local, when it is performing with a unit of data (conditional unit) = 0.1
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01):  0.1
+You have entered a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit) = 0.1
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01):  0.1
+You have entered a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit) = 0.1
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01):  0.1
+You have entered a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit) = 0.1
+level_of_intensivity_of_requests(default value- 20):  25
+level_of_intensivity_of_requests = 25
+Enter a count of iterations for the algorithm(default value- 100):  100
+You have entered the count of iterations for algorithmcount = 100
+capacity_of_statistical_sampling(default value- 10):  20
+capacity_of_statistical_sampling = 20
+s
+To get statistic for Riak and Leo: [coefficient of using resources, level of availability (%), level of consistence (%), total_count_of_data (conditional unit), total_used_resource (conditional unit), count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request, max_lag_of_performance_for_gateway_nodes(for Leo,only), count_of_iterations_for_algorithm * level_of_intensivity_of_requests] - enter "start" :  s and look: 
+
+and get:
+
+Name of Parameter________________________Riak_______________________________Leo 
+_____________________
+level of availability (%) - _______________74.40___________1______________93.36,
+level of consistence (%) - ________________69.69____________2____________93.52,
+count_of_read_lags(outdated information) - ___282.50___________3______________66.40,
+max_lag_of_performance_of_read_request - __23.76_________4________________48.50,
+
+total_used_resource (conditional unit) -____ 227760.00____________6_____________356095.00,
+coefficient of using resource - ______________0.023____________7 _____________0.02,
+total_count_of_failures - ________________767.80_____________8____________875.20,
+count_of_read_failures (decreasing of the availability) - 256.65____________9________160.40,
+count_of_write_failures (decreasing of the availability) - 383.25____________10_________5.60,
+max_lag_of_performance_for_gateway_nodes - ________________11_______________1.27,
+count_of_read//write_actions - __________2500.00__________12_______________2500.00_______ 
+
+
+
+     As we can see Leo has better result: 
+level of availability (%) - _______________74.40___________1______________93.36,
+level of consistence (%) - ________________69.69____________2____________93.52,
+count_of_read_lags(outdated information) - ___282.50___________3______________66.40,
+
+
+
+  But it needs more resources:
+
+max_lag_of_performance_of_read_request - __23.76_________4________________48.50,
+total_used_resource (conditional unit) -____ 227760.00____________6_____________356095.00,
+
+ 2.  THE SECOND MODE
+ We will change the value for next parameter in html file "index-...":
+
+Fashion style varying distances between nodes(0-not used, 1-line, 2-circle; default value- 0):  2.
+
+    We are taking in account a distance between nodes,  using type 2, but without a choice the nearest node.  Run and get:
+
+Parameter________________________Riak_______________________________Leo 
+
+level of availability (%) - _______________71.68___________1______________91.68,
+level of consistence (%) - ________________71.12____________2____________90.51,
+count_of_read_lags(outdated information) - ___247.70___________3______________93.25,
+max_lag_of_performance_of_read_request - __29.22_________4________________50.34,
+total_count_of_data(conditional unit) - ____4548.00____________5_____________5185.90,
+total_used_resource (conditional unit) -____ 521895.00____________6_____________595945.00,
+coefficient of using resource - ______________0.009____________7 _____________0.01,
+total_count_of_failures - ________________1024.25_____________8____________1041.70,
+count_of_read_failures (decreasing of the availability) - 327.55____________9________200.95,
+count_of_write_failures (decreasing of the availability) - 380.45____________10_________7.10,
+max_lag_of_performance_for_gateway_nodes - ________________11_______________1.01,
+count_of_read//write_actions - __________2500.00__________12_______________2500.00_____ 
+
+
+        The values in strings 4,6 and 8 have increased. It is influence of  remoteness.
+
+3. THE THIRD MODE
+We will change the value for next parameter in html file "index-...":
+
+Enter a mode of choice optimal node(1 - switch on, 11 - switch off)(default - switch on) :  1.
+
+We switch  the  possibility to use optimization of choice nodes(servers), and get:
+
+Parameter________________________Riak_______________________________Leo 
+
+level of availability (%) - _______________71.20___________1______________91.80,
+level of consistence (%) - ________________69.36____________2____________90.74,
+count_of_read_lags(outdated information) - ___266.30___________3______________91.65,
+max_lag_of_performance_of_read_request - __21.87_________4________________31.23,
+total_count_of_data(conditional unit) - ____4527.65____________5_____________5357.75,
+total_used_resource (conditional unit) -____ 468890.00____________6_____________587895.00,
+coefficient of using resource - ______________0.010____________7 _____________0.01,
+total_count_of_failures - ________________923.50_____________8____________1019.55,
+count_of_read_failures (decreasing of the availability) - 318.45____________9________199.05,
+count_of_write_failures (decreasing of the availability) - 401.65____________10_________6.05,
+max_lag_of_performance_for_gateway_nodes - ________________11_______________1.13,
+count_of_read//write_actions - __________2500.00__________12_______________2500.00___ 
+
+The values in strings 4,6 and 8 have decreased.
+
+4. Now  let's add servers one at a time in every of seven zones.
+We will change the value for next parameter in html file "index-...":
+
+Enter a count of all nodes(default value- 50):  28
+You have entered the count of all nodes = 28
+
+Run and get:
+
+Parameter________________________Riak_______________________________Leo 
+
+level of availability (%) - _______________72.47___________1______________91.80,
+level of consistence (%) - ________________71.36____________2____________90.80,
+count_of_read_lags(outdated information) - ___250.80___________3______________90.80,
+max_lag_of_performance_of_read_request - __12.62_________4________________7.94,
+total_count_of_data(conditional unit) - ____5474.00____________5_____________6574.20,
+total_used_resource (conditional unit) -____ 480030.00____________6_____________600105.00,
+coefficient of using resource - ______________0.011____________7 _____________0.01,
+total_count_of_failures - ________________973.65_____________8____________1075.80,
+count_of_read_failures (decreasing of the availability) - 307.70____________9________198.30,
+count_of_write_failures (decreasing of the availability) - 380.60____________10_________6.75,
+max_lag_of_performance_for_gateway_nodes - ________________11_______________1.17,
+count_of_read//write_actions - __________2500.00__________12_______________2500.00_______ 
+
+       We have got significant improvement for time performance characteristics. 
+Compare the values of string the  number 4:
+max_lag_of_performance_of_read_request - __12.62_________4________________7.94
+and
+max_lag_of_performance_of_read_request - __21.87_________4________________31.23.
