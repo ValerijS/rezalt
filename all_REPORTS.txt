@@ -1,0 +1,560 @@
+
+
+
+Report 6
+I have wrote first variant of the program,
+ which imitates work of Riak replicate system,
+ and allows to analyse its parameters.
+  This program serves to demonstrate of 
+  possibilities of  imitation system more,
+  than for  the target of the analyse Riak system 
+  itself, because this model is very simple.
+  It takes in account only one particular variant
+  of Riak system, where pw = n, and pr = 1.
+  And it does not consider such important parts
+  as Gossip protocol,  repairing of nodes and so 
+  on. Those will be entered in the next variant 
+  of the program.
+     As for demonstration of possibilities of the
+ imitation system modeling, you can see and 
+get such data as:
+	 - a total count of failures (net's partitions, failures of equipment);
+	 - a count of read lags (cases of outdated information); 
+	 - a count of read failures ( failures to requests for getting data);
+	 - a count of write failures;
+	 - a count of failures for write action;
+	 - a count of failures for send action;
+	 - a count of failures for read action;
+	 - a total amount of data( on all servers);
+	 - a total used resurs in conditioner
+ units,when read_action is one unit;
+     - a total used of resurs by write action in Mb;
+	 - a total used of resurs by read action in Mb; 
+	 - a total use of resurs by send action in Mb.
+	 Using this data, we will analyse such parameters
+ as: availability, consistency, resistance to 
+ failures, use of resources.
+    Program consists of HTML file "index.html", with inputs 
+elements, which helps to enter initial data: 
+ - a count of nodes (servers) in cluster; 
+ - a probability of  a failure for a send_action, when
+ it is performing with a unit of data (1 Mb); 
+ - a probability of  a failure for a write_action, when it is performing with a unit of data (1
+ Mb); 
+ - a probability of  a failure for a read_action, when
+ it is performing with a unit of data (1 Mb);  
+ - a count of iterations for the algorithm;
+   and js script "RiakModel.js" ,with function "riakImtModel()".
+10 of 12 items
+
+
+
+
+                   Report 11. The comparative statistical analysis of Riak and Leo systems.
+         I created html page "index_statistic_14_09_14.html" and JS script "functForStatRiakLeo_14_09_14.js"
+ for statistical analysis of Riak and Leo systems. Using this page we can set the same setting parameters 
+ for both systems and capacity of statistical sampling, and then make comparative statistical analysis
+ of main output's parameters Riak and Leo systems, such as availability,consistency and others.
+          If we set all default setting : 
+		  
+	Enter a count of all nodes(default value- 50): 
+Enter a count of Storage-nodes (servers)(default value- 40) :             // (for Leo system only) 
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) : 
+Enter w_walue(min number for write copies.)(default value- 2): 
+Enter a r_value(min number for read copies)(default value- 2): 
+Enter an interval_for_repair(default value- 25):               //(for riak system only)
+Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+level_of_intensivity_of_requests(default value- 20): 
+Enter a count of iterations for the algorithm(default value- 100): 
+capacity_of_statistical_sampling(default value- 20): 
+     We will get:
+	 
+	 Name of Parameter________________________Riak_______________________________Leo 
+
+level of availability (%) - _______________97.99___________1______________99.01,
+level of consistence (%) - ________________98.53____________2____________99.64,
+count_of_read_lags(outdated information) - ___29.40___________3______________7.20,
+max_lag_of_performance_of_read_request - __19.30_________4________________10.40,
+total_count_of_data(conditional unit) - ____9920.80____________5_____________9987.35,
+total_used_resource (conditional unit) -____ 142085.00____________6_____________147695.00,
+coefficient of using resource - ______________0.070____________7 _____________0.07,
+total_count_of_failures - ________________169.30_____________8____________183.60,
+count_of_read_failures (decreasing of the availability) - 28.00____________9________18.50,
+count_of_write_failures (decreasing of the availability) - 12.15____________10_________1.30,
+max_lag_of_performance_for_gateway_nodes - ________________11_______________0.64,        //(for Leo system only)
+count_of_read//write_actions - __________2000.00__________12_______________2000.00_____
+
+    As we see the results of Leo are a little better. Let remember, that:
+
+	level of availability (%) = (((count of iterations for algorithm ) * (level of intensity of requests) - (count of read failures  + count of write failures)) / (count_of_iterations_for algorithm * level_of_intensivity_of_requests)) * 100 ;
+	
+	level of consistence (%) = (((count_of_iterations_for_algorithm * level_of_intensivity_of_requests - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests)) * 100);
+	
+	count_of_read_lags(delays) - cases of outdated information;
+	
+	max_lag_of_performance_of_read_request - describes the speed of working the system in whole.
+	
+	Now we will create more problem situation with different failures. We set:
+	
+	Enter w_walue(min number for write copies.)(default value- 2): 
+Enter a r_value(min number for read copies)(default value- 2): 
+Enter an interval_for_repair(default value- 25): 
+Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a local, when it is performing with a unit of data (conditional unit) = 0.1        (change)  
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit) = 0.1   (change)
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit) = 0.1   (change)
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit) = 0.1     (change)
+level_of_intensivity_of_requests(default value- 20): 
+Enter a count of iterations for the algorithm(default value- 100): 
+capacity_of_statistical_sampling(default value- 20): 
+
+	And we get:
+    Name of Parameter________________________Riak_______________________________Leo 	
+	level of availability (%) - _______________79.81___________1______________83.89,
+level of consistence (%) - ________________94.19____________2____________98.57,
+count_of_read_lags(outdated information) - ___116.25___________3______________28.65,
+max_lag_of_performance_of_read_request - __3.61_________4________________4.78,
+
+   As we see the results of Leo are  better. But it uses more resources:
+   
+   total_used_resource (conditional unit) -____ 141945.00____________6_____________180805.00.
+   
+    The farther - the more;
+	set:
+	
+	Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a local, when it is performing with a unit of data (conditional unit) = 0.31       //(change)
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit) = 0.31  //(change)
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)=0.31//change     
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit) = 03.1//(change).
+
+   get:
+	Parameter________________________Riak_______________________________Leo 
+    
+	level of availability (%) - _______________29.00___________1______________34.59,
+level of consistence (%) - ________________99.87____________2____________99.96,
+count_of_read_lags(outdated information) - ___2.65___________3______________0.85,
+max_lag_of_performance_of_read_request - __1.29_________4________________1.32,
+total_count_of_data(conditional unit) - ____801.65____________5_____________787.49,
+total_used_resource (conditional unit) -____ 113381.00____________6_____________171025.00.
+
+   Now we will investigate, what is the influence of quantity of servers 
+ for  speed  system's working.
+ 
+ 1) set:
+ 
+   Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 10
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 8    //(for Leo system only)
+
+ get:
+ 
+          Parameter________________________Riak_______________________________Leo   
+ max_lag_of_performance_of_read_request - __38.49_________4________________122.15,
+ max_lag_of_performance_for_gateway_nodes - ________________11_______________112.24, //(for Leo system only).
+ 
+2)set:
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 20  //(!!!)
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 16
+
+ get:
+ max_lag_of_performance_of_read_request - __20.01_________4________________30.52, 
+ max_lag_of_performance_for_gateway_nodes - ________________11_______________8.27,
+ 
+ 3) set:
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 30  //(!!!)
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 24
+ 
+  get:
+ max_lag_of_performance_of_read_request - __18.47_________4________________17.48,
+ max_lag_of_performance_for_gateway_nodes - ________________11_______________1.22.
+ 
+ 4) set:
+ 
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 40  //(!!!) 
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 32
+
+ get:
+ max_lag_of_performance_of_read_request - __14.45_________4________________15.48,
+ max_lag_of_performance_for_gateway_nodes - ________________11_______________0.75. //(!!!)
+ 
+      We can see, that for Leo system it is important proportion (ratio) between gateway nodes and storage-nodes.
+	In case 4, "max_lag_of_performance_for_gateway_nodes " is smaller than 1, and therefor doesn't have influence
+	for next running. And, farther, it will be more effective, if the part of the gateway nodes will be smaller.
+       But in case 1, it must be  more effective  a  greater part for gateway, look, just now ,1a) case:
+
+1a) set:
+
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 10
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 6 //!!!
+
+  get:
+  max_lag_of_performance_of_read_request - __35.61_________4________________90.87,  //(!!!)
+  max_lag_of_performance_for_gateway_nodes - ________________11_______________7.20.
+
+    But, from other side, case 1b) is less effective:
+1b) set:
+
+Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 10
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 5  //!!!
+
+  get:
+ max_lag_of_performance_of_read_request - __42.41_________4________________109.25, //(!!!) 
+ max_lag_of_performance_for_gateway_nodes - ________________11_______________1.08 
+ 
+ 5) set:
+ 
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 50 //!!!
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 44
+ 
+  get:
+  max_lag_of_performance_of_read_request - __11.78__???_______4________________15.67    //!!!___!!!
+  max_lag_of_performance_for_gateway_nodes - ________________11_______________0.94.
+  
+ 6) set:
+
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 75 //!!!
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 69
+  get:
+ max_lag_of_performance_of_read_request - __13.57__???_______4________________13.95,
+ max_lag_of_performance_for_gateway_nodes - ________________11_______________0.92 .
+ 
+ Why 13.57 > 11.78 ? It is not clear! Perhaps, it is statistical error? Let increase capacity_of_statistical_sampling,
+ and repeat experiments.
+ 
+ 5a) set:
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 50 //!!!
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 44
+  get:
+  max_lag_of_performance_of_read_request - __13.59___!!!______4________________16.91, !!!
+  max_lag_of_performance_for_gateway_nodes - ________________11_______________0.96.
+  
+ 6a) set:
+
+ Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 75  //!!!
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 69 
+capacity_of_statistical_sampling(default value- 20): 
+capacity_of_statistical_sampling = 40. //!!!
+ get:
+  max_lag_of_performance_of_read_request - __12.86___!!!______4________________14.00, !!!
+  max_lag_of_performance_for_gateway_nodes - ________________11_______________0.88.
+  
+  Now its clear.
+  
+  7) set:
+  Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 100 //!!!
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 92
+capacity_of_statistical_sampling(default value- 20): 
+capacity_of_statistical_sampling = 40  
+  get:
+  max_lag_of_performance_of_read_request - __11.78_________4________________12.23,  //!!!
+  max_lag_of_performance_for_gateway_nodes - ________________11_______________0.68.
+  
+  8) set:
+  Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 200 //!!!
+Enter a count of Storage-nodes (servers)(default value- 40) : 
+You have entered the count of Storage-nodes = 190
+capacity_of_statistical_sampling(default value- 20): 
+capacity_of_statistical_sampling = 40 
+  get:
+   max_lag_of_performance_of_read_request - __11.08_________4________________10.50 //!!!
+   max_lag_of_performance_for_gateway_nodes - ________________11_______________0.61.
+   
+ Me can make conclusion: the most rational qwontity of clusters is about 40. (For level of request's intensive - 20 requests
+ in one conditional unit of time).
+  We will continue statistic  in next report.
+  
+ 
+
+
+
+            Report 12 The continuation of statistical analysis of Riak system.
+     At first we will a little verify our program. For this purpose we calculate theoretical value
+ of mathematical expectation for random variable "max_lag_of_performance_of_read_request",
+ when are setting a small values for parameters "Enter a count of iterations for the algorithm", "level_of_intensivity_of_requests", and number of types of inform's objects (Riak objects).
+    In our Riak model there are four types of Riak objects : built  type object  - 'start' ,
+ and types setted by user : 'text', 'foto' (photo), vidio (animation).
+   The type defines values of next properties: data size of Riak object in conditional units,
+coefficient  for probability of failure for this type,  and coefficient  for time
+ of performance  actions with Riak object in conditional units (indexes [1] ,[3],[4] of items
+ in the array ( line 102,initial setting's part of  the definition of function " riakModel()"
+ from file fanctRiakImitmodel_26-09-14.js)). It is meta information.
+      You can change user's setting types and values of properties, or add new types
+ by changing line 102.
+         For the test we will change next values of settings:
+103 probabilities_selectings_of_metaRiak_objects = [0, 1, 0];
+
+Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 5
+
+Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a local, when it is performing with a unit of data (conditional unit) = 0
+
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit) = 0
+
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit) = 0
+
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit) = 0
+level_of_intensivity_of_requests(default value- 20): 
+level_of_intensivity_of_requests = 2
+
+Enter a count of iterations for the algorithm(default value- 100): 
+You have entered the count of iterations for algorithmcount = 1	
+
+  	As result we will have only 2 requests, and only some (one or two) types
+from set = {'start', 'photo'}; 'text' and 'video' have zero probability, according with our setting.
+    Every time, when is received read or write request, Riak successfully (probability of failures is zero according with our 
+setting ) finds 3 (n_value = 3, by default) nodes from 5(number all nodes in cluster according with our setting is 5).
+It follows, that if we have 2 requests, there is at least
+one node which was used twice.
+   The time for performance the read or write (local) action for 'start' is 0.201.
+   
+line 104  obj_current = {start:['start', 0.001, 0.55, 0.1, 0.201]};
+
+The time for performance the an action for 'foto' is 0.1   (= metaRiak_objects[1][4]).
+
+line 103   metaRiak_objects = [["text", 0.01, value_of_Riak_object, 0.1, 0.001], ["foto", 2, value_of_Riak_object, 1, 0.1], ["vidio", 50,  value_of_Riak_object, 5, 1]];
+and
+line 271 current_bucket_or_needle =  randomElection(metaRiak_objects, probabilities_selectings_of_metaRiak_objects); 
+line 272 obj_current[key_of_bucket_or_needle] = current_bucket_or_needle; 
+    
+   when read actions are appeared before the first write action, they can find object only 'start' - type's.
+   
+
+Write action elects key and type of object for this key
+ 
+(line 257 list_of_entering_keys.push('k' + t + '_' + u);
+line 258 key_of_bucket_or_needle = 'k' + t + '_' + u;
+line 267 key_of_bucket_or_needle = randomElection(list_of_entering_keys,  uniformDistrOf_n_Elem(list_of_entering_keys.length));
+line 271 current_bucket_or_needle =  randomElection(metaRiak_objects, probabilities_selectings_of_metaRiak_objects);)
+
+it will be 'foto', in our case. 
+ Probabilities of action's events are:
+line 78 actions = [write_action, read_action];
+line 79 probabilities of actions = [0.3, 0.7]; 
+   And, at last,
+line 404  key_of_bucket_or_needle = randomElection(list_of_entering_keys,  uniformDistrOf_n_Elem(list_of_entering_keys.length));
+ gives 0.5 to 0.5 for election between  'start' and  'foto' at second step.(after write action at first step)
+  We will have next outcome of the trial:
+1. 'read' with 'start' and  'read' with 'start', probability - 0.7 * 0.7 = 0.49, value of time lag - 0.201 + 0.201 = 0.402.
+
+2.'read' with 'start' and 'write' with anything, probability - 0.7 * 0.3 = 0.21, value of time lag - 0.201.
+
+3.'write-new with 'foto' and 'read' with 'start',probability - 0.3* 0.7 * 0.5 * 0.31 = 0.0325, value - 0.1 + 0.201 = 0.301
+
+4.'write-new with 'foto' and 'read' with 'foto',probability - 0.3* 0.7 * 0.5 * 0.31 = 0.0325, value - 0.1 + 0.1 = 0.2
+
+5. 'write-old with 'foto' and 'read' with 'foto',probability - 0.3 * 0.7 * 0.69 = 0.145, value - 0.1 + 0.1 = 0.2.
+
+5.'write'                      and 'write',    probability - 0.3 * 0.3 = 0.09,            value - 0.
+
+And,  we calculate theoretical value of mathematical expectation for random variable "max_lag_of_performance as:
+         0.402 * 0.49  + 0.201 * 0.21 + 0.301 * 0.032 + 0.2 * 0.178 + 0 * 0.09 = 0.291795.
+		 
+		 That's all, as for theory, let's go to a practice, and will run our program. We get:
+       max_lag_of_performance_of_read_request - __ 0.29,
+		   
+   let's repeat 5 times, and we get: 0.26, 0.25, 0.30, 0.32, (around 0,28).
+      
+    the test  shows, that the program is right.
+   Now, let's change object from 'foto' to 'vidio'. For this purpose, we will change line 103;
+   from:
+  probabilities_selectings_of_metaRiak_objects = [0, 1, 0];   
+  to:
+  probabilities_selectings_of_metaRiak_objects = [0, 0, 1];
+  And run program again with new loading in browser, we get:
+  
+  max_lag_of_performance_of_read_request - __0.62.
+  
+  The theoretical value of mathematical expectation for random variable is
+
+     0.402 * 0.49 + 0.201 * 0.21 + 2 * 0.178 + 1.21 * 0.032 + 0.09 = 0.63.   
+ The test says all right.
+  Continue will be in the next report.
+ 
+
+ 
+                                        Report - 13
+	A use the imitational model for a statistical analysis of an influence values of n, w, r parameters
+	on availability and consistence of Risk system. If we run program (attached) in normal conditions 
+	(all setting parameters with default values), we will get:  
+            Name of Parameter________________________Riak
+      level of availability (%) - _______________99.80,
+      level of consistence (%) - ________________99.99, 
+	  with good level of availability and consistence.
+	 But if we change conditions  up to extremal , by setting:
+      Enter a count of all nodes(default value- 50): 
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) : 
+Enter w_walue(min number for write copies.)(default value- 2): 
+Enter a r_value(min number for read copies)(default value- 2): 
+Enter an interval_for_repair(default value- 25): 
+Not more than 0.3 for every probability.
+Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a local, when it is performing with a unit of data (conditional unit) = 0.3  !!!
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit) = 0.3  !!!
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit) = 0.3  !!!
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit) = 0.3  !!!
+level_of_intensivity_of_requests(default value- 20): 
+Enter a count of iterations for the algorithm(default value- 100): 
+capacity_of_statistical_sampling(default value- 20): 
+To get statistic for Riak and Leo: [coefficient of using resources, level of availability (%), level of consistence (%), total_count_of_data (conditional unit), total_used_resource (conditional unit), count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request] - enter "start" : 	and look:
+
+level of availability (%) - _______________67.25,
+level of consistence (%) - ________________98.12,
+
+    Now we will decrease w_value  and r_values from 2 to 1:
+	
+Enter w_walue(min number for write copies.)(default value- 2): 
+You have entered the w_value = 1
+Enter a r_value(min number for read copies)(default value- 2): 
+You have entered the r_value = 1
+	      
+  Run and get:
+  
+level of availability (%) - _______________78.34,
+level of consistence (%) - ________________96.20,  
+
+     The availability increased at the expense of decreasing of the consistence.
+If we will go another way, and we will not change w_value and r_value,
+ but we   increase n_value,
+
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) : 
+You have entered the n_value = 5
+Enter w_walue(min number for write copies.)(default value- 2): 
+You have entered the w_value = 2
+Enter a r_value(min number for read copies)(default value- 2): 
+You have entered the r_value = 2
+
+  then we get:
+  
+level of availability (%) - _______________76.14,
+level of consistence (%) - ________________99.60,
+
+    We have the double effect at the expense of increasing a use resource  from: 
+	
+total_used_resource (conditional unit) -____ 1226800.00,  
+
+    to:
+	
+total_used_resource (conditional unit) -____ 1355700.00.
+
+  Further more:
+
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) : 
+You have entered the n_value = 7,
+
+  and get:
+
+level of availability (%) - _______________80.20,
+level of consistence (%) - ________________99.84,
+
+total_used_resource (conditional unit) -____ 1538800.00;
+
+   then:
+
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) : 
+You have entered the n_value = 9
+
+level of availability (%) - _______________82.52,
+level of consistence (%) - ________________99.77,
+
+total_used_resource (conditional unit) -____ 1625200.00.
+
+   In such manner we can choose the mode for our purposes. 
+   
+   I plan to add to imitational model tools for analysis influence a distance between servers
+   on work of replicate systems.
+     Here I have some questions.
+    Which is the kind of dependence between a time of data transfer and a distance,
+ between a probability of a transfer failure and distance? 
+   As variant me can enter some discrete values (of time or probability) for some levels of the distance,
+for example: transcontinental, great, middle or small.
+   Must system  select closest servers to put  replicas of data? Or contrary to uniformly distribute them?
+ Or random distribute?
+   How do you think? 
+   For entertainment, and for debugging imitational model itself, we can see replies,which our model sends
+   to a user on his read request. To get ones, we have to switch off statistic,
+   to enter not great value  smaller than 101) for parameters "level_of_intensivity_of_requests" and "count of iterations for the algorithm"(such that (level_of_intensivity_of_requests * count of iterations for the algorithm) smaller than 101),
+   
+   for example, you can set: 
+   
+Enter a count of all nodes(default value- 50): 
+You have entered the count of all nodes = 5
+Enter n_value ("n_value" copies will be stored at different servers(nodes))(default value- 3) : 
+Enter w_walue(min number for write copies.)(default value- 2): 
+Enter a r_value(min number for read copies)(default value- 2): 
+Enter an interval_for_repair(default value- 25): 
+You have entered the interval_for_repair = 2
+Not more than 0.3 for every probability.
+Enter a probability of a failure for a local, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a local, when it is performing with a unit of data (conditional unit) = 0.3
+Enter a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a send_action, when it is performing with a unit of data (conditional unit) = 0.3
+Enter a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a write_action, when it is performing with a unit of data (conditional unit) = 0.3
+Enter a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit)(default value- 0.01): 
+You have entered a probability of a failure for a read_action, when it is performing with a unit of data (conditional unit) = 0.3
+level_of_intensivity_of_requests(default value- 20): 
+level_of_intensivity_of_requests = 1
+Enter a count of iterations for the algorithm(default value- 100): 
+You have entered the count of iterations for algorithm count = 50
+capacity_of_statistical_sampling(default value- 1): 
+capacity_of_statistical_sampling = 1
+To get statistic for Riak and Leo: [coefficient of using resources, level of availability (%), level of consistence (%), total_count_of_data (conditional unit), total_used_resource (conditional unit), count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request] - enter "start" : and look: 
+
+   Press F12 and get:   
+
+reply to key k17_1 is  _23--0_re- _19--0_re- -pair: read_lag--value = 17_1-text-and, then: --pair: write_fall--21_1-vidio--and-41_1-foto-and-finish, last at time - 41.100 ; read action 3 from 3 at step 46_1-_- at 46.100 
+reply to key k29_1 is  _31--0_re- -pair: write_fall--value = 29_1-vidio-and, then: -finish, last at time - 31.500 ; read action 3 from 3 at step 47_1-_- at 48.000
+reply to key k12_1 is  _13--0_re- -pair: write_fall--value = 12_1-foto-and, then: -finish, last at time - 13.500 ; read action 2 from 2 at step 48_1-_- at 48.100 
+reply to key k7_1 is  value = 7_1-foto-and, then: -14_1-text-and-18_1-foto-and-28_1-text-and-33_1-text-and-35_1-text-and-36_1-foto-and-finish, last at time - 36.100 ; read action 3 from 3 at step 49_1-_- at 49.100 
+
+
+   In this fragment, we can see 4 replies, for example:
+  reply to user's read request about inform object with key - " k7_1" is "36_1-foto" (this is a cod of real information).
+Also here we can see the history of his object: it was successfully accepted at step 7_1, with beginning value " 7_1-foto",
+then there were 5 modifications "then: -14_1-text-and-18_1-foto-and-28_1-text-and-33_1-text-and-35_1-text-" before came finish value.
+The read request was read at step "49_1" at time "49.100" from all n-value(3) nodes, successfully.
+    The object with key "k17_1" was not so successful, it met two failures at steps "read_lag--value = 17_1-text" and "write_fall--21_1-vidio-", but was 
+repaired at steps "_19--0_re- -pair: read_lag--value = 17_1-text-" and "_23--0_re-...-pair: write_fall--21_1-vidio-".
+	
+	
+9 of 13 items
+
