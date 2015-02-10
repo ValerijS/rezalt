@@ -62,25 +62,25 @@
    document.getElementById("par13-1").innerHTML =  "capacity_of_statistical_sampling = "+ c13'>
    <div id = 'par13-1'></div>
    
-   <!--<div id = 'par141'></div>
+   <div id = 'par141'></div>
      To get statistic for Leofs: [coefficient of using resurs, level of availability (%), level of consistence (%),  total_count_of_data (conditional unit), total_used_resource (conditional unit), count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request, count_of_iterations_for_algorithm * level_of_intensivity_of_requests, count of write actions] - enter  "start" : <input type="text" id="fname141" onchange = 'var c141 = document.getElementById("fname141").value;
 document.getElementById("par141").innerHTML =  c141;	 
 var j, f_st, stat1, statistic; 
 j = 0;
-capacity_of_statistical_sampling = document.getElementById("par13").innerHTML;
+capacity_of_statistical_sampling = document.getElementById("fname13").value ||1; //document.getElementById("par13").innerHTML;
 console.log(capacity_of_statistical_sampling );	
 statisticL = [0,0,0,0,0,0,0,0,0,0,0,0];
 //stat1 = [];
 while (j < capacity_of_statistical_sampling) { 
 	j = j + 1;
-	f_st = leoImitModel();
+	f_st = leoModel();
 	for (i = 0; i < 12; i++) {
 		statisticL[i] = statisticL[i] + (f_st[i] / capacity_of_statistical_sampling)
 		}
 	}
 	
 	
-/* alert(["coefficient of using resource -   " + statistic[0].toFixed(3), 
+ alert(["coefficient of using resource -   " + statisticL[0].toFixed(3)/*, 
 		" level of availability (%) - " + statistic[1].toFixed(2),
 		" level of consistence (%) - " + statistic[2].toFixed(2),
 		" total_count_of_data(conditional unit) - " + statistic[3].toPrecision(3),
@@ -91,7 +91,7 @@ while (j < capacity_of_statistical_sampling) {
 	    " count_of_write_failures (decreasing of the availability) - " + statistic[8].toFixed(2),
 		" max_lag_of_performance_of_read_request - " + statistic[9].toFixed(2),
 		"max_lag_of_performance_for_gateway_nodes - " + statistic[10].toFixed(2),
-	    " count_of_read//write_actions - " + statistic[11].toFixed(2)])*/'><br>-->
+	    " count_of_read//write_actions - " + statistic[11].toFixed(2)*/])'><br>
     
     <div id = 'par14'></div>
 	To get statistic for Riak and Leo: [coefficient of using resources, level of availability (%), level of consistence (%),  total_count_of_data (conditional unit), total_used_resource (conditional unit), count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request, max_lag_of_performance_for_gateway_nodes(for Leo,only), count_of_iterations_for_algorithm * level_of_intensivity_of_requests] - enter  "start" : <input type="text" id="fname14" onchange = 'var c14 = document.getElementById("fname14").value;

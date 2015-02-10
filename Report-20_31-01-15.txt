@@ -23,4 +23,8 @@
  other replicas.
      As we see Elliptical has differences, if to compare with the Riak and Leo systems. Further I am going to build 
  the imitation model of Elliptics, and compare all systems.
+ 
+ 1. http://habrahabr.ru/company/yandex/blog/209882/
+ 2. http://habrahabr.ru/company/yandex/blog/200080/
+ 3. http://habrahabr.ru/company/yandex/blog/228389/.
 
