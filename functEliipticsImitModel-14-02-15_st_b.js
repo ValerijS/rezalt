@@ -79,7 +79,7 @@ function leoModel() {
 		level_of_intensivity_of_requests,
 	    count_of_iterations_for_algorithm,
 		k, k1, k2, n, r, rr, c, j, g, d, b, L, M, G, Int, top, disk1, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
-
+        gr_node, key_gr_node,
 		rem, //array of arrays:rem[i][j] - variations( for: performance time (i=0), resources (i=1), probabilities (i=2)), which are depend from  level remoteness (transcontinental(j=4), great (j=3), middle (j=2), local (j=1)).
         matrix, //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
 
@@ -352,6 +352,7 @@ function leoModel() {
                 disk = 1;
 				
                 for (gr1 in groups) {
+					gr = gr1;
                     if (groups[gr1][2] > obj_current[key_of_bucket_or_needle][1]) {
 						
 					 gr = gr1;   
@@ -361,14 +362,16 @@ function leoModel() {
                 groups[gr][4] = groups[gr][4].concat(curr_nod);
                 if (curr_nod[0][7] > obj_current[key_of_bucket_or_needle][1]) {
 					disk = 0;
+					top = 0.01;
 					break;
 				}				
                 }
                 }
                 if ( disk) {
 					disk1 = 100000;
+					top = 1;
 					for (gr1 in groups) {
-						if (groups[gr1][3] < disk1) {
+						if (groups[gr1][3] <= disk1) {
 						
 							gr = gr1;
 							
@@ -382,7 +385,7 @@ function leoModel() {
 				            //groups[gr][4] = groups[gr][4].concat(curr_nod);	
 				}
 					}
-				curr_nod = groups[gr][4].splice([gr],1);
+				curr_nod = randomElectAndDeleteItem(groups[gr][4]);//curr_nod = groups[gr][4].splice(gr,1);
 				groups[gr][4] = groups[gr][4].concat(curr_nod);
 				//groupsREZERV.push(groups.splice(gr, 1));
 				
@@ -438,7 +441,7 @@ function leoModel() {
                             //if(gossip_protocol[10][key_of_bucket_or_needle]) { 
 							gossip_protocol[10][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                            // }
-							gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                             
                             total_count_of_data  = total_count_of_data + current_bucket_or_needle[1]; //fresh information
 			                total_used_resource = total_used_resource + (use_of_resource_by_write_action + use_of_resource_by_send_action * dist_of_pair[2]) * current_bucket_or_needle[1]; //fresh information.
@@ -478,7 +481,7 @@ function leoModel() {
                                // if(gossip_protocol[10][key_of_bucket_or_needle][curr_nod[0]]) { 
 								gossip_protocol[10][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['(loc) value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -', curr_nod[0][5], [-t, u], '-pair: read_lag--value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                                // }
-							   gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							   //gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
 
                                  //gossip_protocol[11][key_of_bucket_or_needle] + 'node-' + curr_nod[0][0] + 'loc failure value ' + t + '_' + u;
 								curr_nod[0][2][key_of_bucket_or_needle] = 0; //current_bucket_or_needle, put new Riak objeckt
@@ -505,7 +508,7 @@ function leoModel() {
 							//if(gossip_protocol[10][key_of_bucket_or_needle][curr_nod[0]]) {
 							gossip_protocol[10][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['start: write_failure! value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -', curr_nod[0][5], [-t, u], '-pair: write_fall--value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ];
                            // }
-							gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
 
                                 
                             curr_nod[0][2][key_of_bucket_or_needle] = t //current_bucket_or_needle, put new Riak objeckt
@@ -521,7 +524,7 @@ function leoModel() {
                        gossip_protocol[10][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['start: send_failure! value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u],  '-pair: send_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-'];
                          
                         gossip_protocol[9][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '- no commit, and, then: -' , curr_nod[0][5], [-t, u]];
-							gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                         gossip_protocol[2][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['beginning: no commit (send_failure) value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]]; 
                         gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'send_failure: value - ' + t + '_' + u + ' at ' + groups[gr][0] + ',' + curr_nod[0][0] + ' and '; 
                         
@@ -539,7 +542,7 @@ function leoModel() {
 				    gossip_protocol[10][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['start; status_failure! value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], '-pair: satus_failure! value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ];
                     
                     gossip_protocol[9][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '- no commit, and, then: -' , curr_nod[0][5], [-t, u]]; 
-					gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+					//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                     gossip_protocol[2][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['beginning: no commit (status_failure) value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
                      gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'status_failure: value - ' + t + '_' + u + ' at ' + groups[gr][0] + ',' + curr_nod[0][0] + ' and '; 
 				    if(gossip_protocol[1][key_of_bucket_or_needle]) {
@@ -552,7 +555,7 @@ function leoModel() {
 		       // }
 		        //curr_ar = curr_ar.concat(curr_nod);
                 groupsREZERV = groupsREZERV.concat(groups.splice(gr, 1));
-                top = 1;	
+                //top = 1;	
 	        }
                // cluster = cluster.concat(curr_ar);
 				groups = groups.concat(groupsREZERV);
@@ -596,7 +599,7 @@ function leoModel() {
                 a = 0;
 			for (nod in gossip_protocol[2][key_of_bucket_or_needle]) {
 //console.log(gossip_protocol[2][key_of_bucket_or_needle]);
-                top = 1;				 
+                //top = 1;				 
 			    for (gr1 = 0; gr1 < number_of_Elliptics_groups; gr1++) { //eto
 					for (nod1 in groups[gr1][4]) { //eto1
                     if (groups[gr1][0] + ',' + groups[gr1][4][nod1][0] === nod) {
@@ -659,7 +662,7 @@ function leoModel() {
                             if(gossip_protocol[10][key_of_bucket_or_needle] && gossip_protocol[10][key_of_bucket_or_needle][nod]) {
                              gossip_protocol[10][key_of_bucket_or_needle][nod] = [gossip_protocol[10][key_of_bucket_or_needle][nod][0] + t +'_' + u + current_bucket_or_needle[0] + '-and-', curr_nod[0][5], [-t, u], gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-,and -' ]; 
                               }
-							gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = [gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] +'write ok: value - ' +  t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = [//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] +'write ok: value - ' +  t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
  
                             [gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'write ok: value - ' + t + '_' + u + ' at ' + groups[gr][0] + ',' + curr_nod[0][0] + ' and '];
 							total_count_of_data  = total_count_of_data + current_bucket_or_needle[1]; //fresh information
@@ -698,7 +701,7 @@ function leoModel() {
                                 if(gossip_protocol[10][key_of_bucket_or_needle] && gossip_protocol[10][key_of_bucket_or_needle][nod]) {
 								gossip_protocol[10][key_of_bucket_or_needle][nod] = [ gossip_protocol[10][key_of_bucket_or_needle][nod][0] + t +'_' + u +'- (loc) -' + current_bucket_or_needle[0] + '-and-', curr_nod[0][5], [-t, u], gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add (loc)__' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-'];
                                  }
-							gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
 
 								curr_nod[0][2][key_of_bucket_or_needle] = 0; //current_bucket_or_needle, put new Riak objeckt
 								curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
@@ -722,7 +725,7 @@ function leoModel() {
 							if(gossip_protocol[10][key_of_bucket_or_needle] && gossip_protocol[10][key_of_bucket_or_needle][nod]) {			
 							gossip_protocol[10][key_of_bucket_or_needle][nod] = [gossip_protocol[10][key_of_bucket_or_needle][nod][0]+ ' write_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-', curr_nod[0][5], [-t, u], gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: write_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-'];
                             }
-							gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+							//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                             gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + t +'_' + u +'-' + current_bucket_or_needle[0] + ' no commit -and-', curr_nod[0][5], [-t, u]];
                             curr_nod[0][2][key_of_bucket_or_needle] = t //current_bucket_or_needle, put new Riak objeckt
 			                curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
@@ -741,7 +744,7 @@ function leoModel() {
 					    gossip_protocol[10][key_of_bucket_or_needle][nod] = [gossip_protocol[10][key_of_bucket_or_needle][nod][0] +'send_failure - ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and-', curr_nod[0][5], [-t, u], gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: send_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-'];
                          }
                         gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + t +'_' + u +'-' + current_bucket_or_needle[0] + ' no commit -and-', curr_nod[0][5], [-t, u]];
-						gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+						//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
 
                         gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'send_failure : value - ' + t + '_' + u + ' at ' + groups[gr][0] + ',' + curr_nod[0][0] + ' and ';   
 		                //c = c - 1;
@@ -758,7 +761,7 @@ function leoModel() {
 				    gossip_protocol[10][key_of_bucket_or_needle][nod] = [gossip_protocol[10][key_of_bucket_or_needle][nod][0]+ 'status_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-', curr_nod[0][5], [-t, u], gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: status_fall--' + t +'_' + u +'-' + current_bucket_or_needle[0] + '--and-'];
                     }
                     gossip_protocol[9][key_of_bucket_or_needle][nod] = [gossip_protocol[2][key_of_bucket_or_needle][nod][0] + t +'_' + u +'-' + current_bucket_or_needle[0] + ' no commit -and-', curr_nod[0][5], [-t, u]]; 
-					gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
+					//gossip_protocol[10][key_of_bucket_or_needle]['uch' + a++] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u],  gossip_protocol[2][key_of_bucket_or_needle][nod][0] + '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
 
                     gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + 'status_fall: value - ' + t + '_' + u + ' at ' + groups[gr][0] + ',' + curr_nod[0][0] + ' and '; 
 				    if(gossip_protocol[1][key_of_bucket_or_needle]) {
@@ -903,30 +906,65 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
 		if (t % interval_for_repair == interval_for_repair - 1) {
 		            w++;
 					for (x in gossip_protocol[10]) {
-					    v1 =0;
+					    //v1 =0;
+						l = 0;
 					    for (node in gossip_protocol[10][x]) {
                              if (gossip_protocol[10][x][node]) {
+								 for (n  in groups){ 
+								 for (m in groups[n][4]) {
+//console.log(gr_node,groups[n][0] + ',' + groups[n][4][m][0],node, 'me');										 
+									 if(groups[n][0] + ',' + groups[n][4][m][0] === node) {
+									gr_node = groups[n][4][m];
+//console.log(gr_node,groups[n][4][m][6][0] + ',' + groups[n][4][m][6][1],node, 'me');									
+									 }
+								 }
+								 }
 				            if (gossip_protocol[10][x][node][3]) {
-							 l = 0;
-                            gossip_protocol[2][x] = {};
-					 while (l < w_value) {
+							 l++;
+                            //gossip_protocol[2][x] = {};
+                            				
+							gossip_protocol[2][x][node] = ['_' + t + '--' + u + '_re- ' + gossip_protocol[10][x][node][3], curr_nod[0][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]]];
+							gr_node[1] = 1;
+							if (gr_node[7] > obj_current[x][1]) {
+							
+							gr_node[7] = gr_node[7] - obj_current[x][1];
+							gr_node[5] = Math.max(gr_node[5], t) + time_for_performance_repair_action * 0.01;//time performance repair.
+					        total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, gr_node[5]);
+							}
+//console.log(groups[gr_node[6][0]]);	
+						    if(groups[gr_node[6][0]]) {
+							groups[gr_node[6][0]][3] = groups[gr_node[6][0]][3] + obj_current[x][1];
+							}
+							gr_node[9] = gr_node[9] + obj_current[x][1];
+							gr_node[5] = Math.max(gr_node[5], t) + time_for_performance_repair_action;//time performance repair.
+					        total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, gr_node[5]);
+							}
+							 
+							 total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
+
+					    }
+						}
+					/* while (l < w_value) {//eto3
 				     for (gr in groups) {
-                    if (groups[gr][2] > obj_current[key_of_bucket_or_needle][1]) {
+                    if (groups[gr][2] > obj_current[x][1]) {
 						
 					    
 
                 curr_nod = randomElectAndDeleteItem(groups[gr][4]);
 
                 groups[gr][4] = groups[gr][4].concat(curr_nod);
-                if (curr_nod[0][7] > obj_current[key_of_bucket_or_needle][1]) {
+                if (curr_nod[0][7] > obj_current[x][1]) {
+					curr_nod[0][5] = Math.max(curr_nod[0][5], t) + time_for_performance_repair_action * 0.01;//time performance repair.
+					curr_nod[0][7] = curr_nod[0][7] + obj_current[x][1];
 					disk = 0;
 					break;
 				}				
                 }
                 }
                 if ( disk) {
+					disk1 = 100000;
 					for (gr1 in groups) {
-						if (groups[gr1][3] < disk1) {
+						if (groups[gr1][3] <= disk1) {
 							
 							gr = gr1;
 							//groups[gr][3] = groups[gr][3] + obj_current[key_of_bucket_or_needle][1];
@@ -946,29 +984,28 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
                    //	m = (m + 1) % count_of_nodes_in_group;
 					curr_nod[0][5] = Math.max(curr_nod[0][5], t) + time_for_performance_repair_action;//time performance repair.
 					total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, curr_nod[0][5]);
-                    gossip_protocol[2][x][groups[gr][0] + ',' + curr_nod[0][0]] = ['_' + t + '--' + u + '_re- ' + gossip_protocol[10][x][node][3], curr_nod[0][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]]];
+                    //gossip_protocol[2][x][groups[gr][0] + ',' + curr_nod[0][0]] = ['_' + t + '--' + u + '_re- ' + gossip_protocol[10][x][node][3], curr_nod[0][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]]];
                     curr_nod[0][1] = 1;
 					//gossip_protocol_repair.push([curr_nod[0][0] , 1, gossip_protocol[4][x], "repair" + t]);
- 		total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
+					total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
+
                    l = l +1;
-					}
+					}//eto3*/
                     for (node1 in gossip_protocol[10][x]) {
                         gossip_protocol[10][x][node1][3] = 0;
                         }
-                    break;
-							    
-								} 
-							}
-						
+                    
+					
                     
 				  	if ( gossip_protocol[8][x]) {				
 					    count_of_write_failures  = count_of_write_failures - 1;
 						gossip_protocol[8][x] = 0;
 					}	
- 		            
+					 total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action + use_of_resource_for_seaching_one_Riak_object_at_one_node ;
+			
+					} 
                  
-                    total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action + use_of_resource_for_seaching_one_Riak_object_at_one_node * (gossip_protocol[1][x].length - 1);
-			}
+                   
             
 		}	
             
@@ -980,7 +1017,7 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
 		
 		
 				
-	}
+	//}?
 	/*for (x in gossip_protocol[10]) {
 					    //v1 =0;
 					    for (node in gossip_protocol[10][x]) {
@@ -1012,9 +1049,9 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
                 }
   
 }*/
+total_used_resource = total_used_resource + total_use_of_resource_by_repair_action; 
 //w++;
         }
-total_used_resource = total_used_resource + total_use_of_resource_by_repair_action;  
 //input part:   
    
    
