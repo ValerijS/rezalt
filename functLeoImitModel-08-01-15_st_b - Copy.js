@@ -78,7 +78,7 @@ function leoModel() {
 		interval_for_repair,
 		level_of_intensivity_of_requests,
 	    count_of_iterations_for_algorithm,
-		k, n, r, rr, c, j, g, d, b, L, M, G, Int, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
+		k, k1, k2, n, r, rr, c, j, g, d, b, L, M, G, Int, top, disk1, bound, curr_ar, curr_nod, nod, change_gossip_protocol, node, node1,
 
 		rem, //array of arrays:rem[i][j] - variations( for: performance time (i=0), resources (i=1), probabilities (i=2)), which are depend from  level remoteness (transcontinental(j=4), great (j=3), middle (j=2), local (j=1)).
         matrix, //array of arrays:matrix[i][j] - level remoteness(1(L),2(M),3(G),4(Int)) between nodes node-i and node_j.
@@ -111,7 +111,7 @@ function leoModel() {
 	
     p_of_storage_action = 1e-6;
     use_of_resource_by_storage_action = 0.001;
-    
+    top = 1;
 	value_of_Riak_object = '';
     metaRiak_objects = [["text", 0.01, value_of_Riak_object, 0.1, 0.001], ["foto", 2, value_of_Riak_object, 1, 0.1], ["vidio", 50,  value_of_Riak_object, 3, 1]];//Value of Riak object = [type of Riak object, data size of Riak object in conditional units,  context(really - input time), coefficient  for probability of failure for this type, time size of Riak object in conditional units], type may be: ["text", 0.01, t, 0,1, 0.001], ["foto", 2, t, 1, 0.1], ["vidio", 50, t, 5, 1]. 
 	probabilities_selectings_of_metaRiak_objects = [0.5, 0.3, 0.2]; //each item corresponds corresponding item from Riak_objects.
@@ -152,7 +152,10 @@ function leoModel() {
 	value_of_UpdataForCurrRiak_object1 = 'value ='
 	clusterForKey = {};
 	valueOfRiakObj = [];
-	
+	free_oper_memory_in_group = 4000 * count_of_nodes_in_group;//Size of free operative memory in all servers of group together.
+    size_of_use_disks_in_group = 0; //Size of the use  memory on disks in the group.
+    min_nodes_performance_time = 0;
+	disk1 = 1000;
 	groups = [];
 
 	gossip_protocol =[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
@@ -160,17 +163,16 @@ function leoModel() {
 	    
     for (k2 = 1; k2 <=  count_of_nodes_in_group; k2++) { cluster.push(['node_' + k2, 1, {}, 0, {}, 0, k2]);}
     
-	for (k = 1; k <= number_of_Elliptics_groups; k++) {
-		cluster = [];
-        for (k2 = 1; k2 <=  k; k2++) { cluster.push(['node_' + k2, 1, {}, 0, {}, 0, k2]);}
- 
-		 
-        groups[k] = ['group_' + k, count_of_nodes_in_group, 4 * count_of_nodes_in_group, cluster    /*for (k2 = 1; k2 <=  count_of_nodes_in_group; k2++) { cluster.push(['node_' + k2, 1, {}, 0, {}, 0, k2]);}*/];
- 
-		
-
+	for (k = 0; k <= number_of_Elliptics_groups - 1; k++) {
+		groups[k] = ['', count_of_nodes_in_group, 80, 0,[], 0, 0 ];
+        for (k2 = 1; k2 <=  count_of_nodes_in_group; k2++) {
+			groups[k][4].push(['node_' + k2, 1, {}, 0, {}, 0, [k + 1, k2], 4, top]);
+		}		 
+        groups[k][0] = 'group_' + (k + 1)//, count_of_nodes_in_group, free_oper_memory_in_group, size_of_use_disks_in_group, cluster, min_nodes_performance_time, k + 1];
+        groups[k][6] = k +1; 		
+//console.log(groups, groups[k][4]);
     }
-console.log(groups, groups[2][3]);
+//console.log(groups, groups[2][3]);
 
     matrix = [[]];
     switch (rem_type) {
@@ -257,14 +259,18 @@ console.log(groups, groups[2][3]);
 		gossip_protocol_repair,
         current_bucket_or_needle,
 		key_of_bucket_or_needle,
-        gtw_curr_nod,
+        use_curr_nod,
         dist_of_pair,
         distance,
         pair,
         curr_time_min,
+		groupsREZERV,
         time_min,
         i_min,
+		i_min1,
+		i_min2,
         w_ac,
+		gr, gr1,
         gw, //total dilay for performance time for gtw 
 		t, m, w, v, v1, u, l, a;
    
@@ -282,112 +288,21 @@ console.log(groups, groups[2][3]);
 		probabilities_of_actions = [0.5 + 0.5 / t, 0.5 - 0.5 / t];
 		
 		
-// iteration's part, repair action:	
-        
-        /*if (t % interval_for_repair == interval_for_repair - 1) {
-		            w++;
-					for (x in gossip_protocol[10]) {
-					    v1 =0;
-					    for (node in gossip_protocol[10][x]) {
-                             if (gossip_protocol[10][x][node]) {
-				            if (gossip_protocol[10][x][node][3]) {
-							 l = 0;
-                            gossip_protocol[2][x] = {};
-					 while (l < w_value) {
-                   	m = (m + 1) % count_of_nodes_in_group;
-					cluster[m][5] = Math.max(cluster[m][5], t) + time_for_performance_repair_action;//time performance repair.
-					total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, cluster[m][5]);
-                    gossip_protocol[2][x][cluster[m][0]] = ['_' + t + '--' + u + '_re- ' + gossip_protocol[10][x][node][3], cluster[m][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]]];
-                    
-					//gossip_protocol_repair.push([cluster[m][0] , 1, gossip_protocol[4][x], "repair" + t]);
- 		total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
-                   l = l +1;
-					}
-                    for (node1 in gossip_protocol[10][x]) {
-                        gossip_protocol[10][x][node1][3] = 0;
-                        }
-                    break;
-							    
-								} 
-							}
-						
-                    
-				  	if ( gossip_protocol[8][x]) {				
-					    count_of_write_failures  = count_of_write_failures - 1;
-						gossip_protocol[8][x] = 0;
-					}	
- 		            total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
-                 
-                    total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action + use_of_resource_for_seaching_one_Riak_object_at_one_node * (gossip_protocol[1][x].length - 1);
-			}
-            
-		}	
-            
+
 			
-		for (n = 0; n < cluster.length; n++) {
-			cluster[n][1] = 1;
-				
-		}
-		
-		total_used_resource = total_used_resource + total_use_of_resource_by_repair_action;
-				
-	}
-	for (x in gossip_protocol[10]) {
-					    //v1 =0;
-					    for (node in gossip_protocol[10][x]) {
-//console.log(gossip_protocol[10][x][node], x,node);
-                             if (gossip_protocol[10][x][node]) {
-				            if (gossip_protocol[10][x][node][3]) {
-                    for (m = 0; m < cluster.length; m++) {
-                        if (cluster[m][0] == node) { 
-							// l = 0;
-                            //gossip_protocol[2][x] = {};
-					// while (l < w_value) {
-                   	//m = (m + 1) % count_of_nodes_in_group;
-					cluster[m][5] = Math.max(cluster[m][5], t) + time_for_performance_repair_action;//time performance repair.
-					total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion, cluster[m][5]);
-                    gossip_protocol[2][x][node] = ['_' + t + '--' + u + '_manager re- ' + gossip_protocol[10][x][node][3], cluster[m][5], [-gossip_protocol[10][x][node][2][0], gossip_protocol[10][x][node][2][1]]];
-                    
-					//gossip_protocol_repair.push([cluster[m][0] , 1, gossip_protocol[4][x], "repair" + t]);
- 		total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
-                   //l = l +1;
-					}
-                }
-                    //for (node1 in gossip_protocol[10][x]) {
-                        gossip_protocol[10][x][node][3] = 0;
-                        //}
-                    //break;
-							    
-								} 
-							}
-						
-                    
-				  	if ( gossip_protocol[8][x]) {				
-					    count_of_write_failures  = count_of_write_failures - 1;
-						gossip_protocol[8][x] = 0;
-					}	
- 		            total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action +  obj_current[x][1] * use_of_resource_by_send_action;
-                 
-                    total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action + use_of_resource_for_seaching_one_Riak_object_at_one_node * (gossip_protocol[1][x].length - 1);
-                }
-            }
-            total_used_resource = total_used_resource + total_use_of_resource_by_repair_action;
-w++;*/
-// iteration's part:				
            
         while (u < level_of_intensivity_of_requests) {
 		u = u + 1;
 		
         current_action = randomElection(actions , probabilities_of_actions ); //random election of action.
 //console.log(groups, 'rew1');alert(groups);
-        gtw_curr_nod = randomElectAndDeleteItem(groups);//Gateway operation with write request(begin).
+        gtw_curr_nod = randomElectAndDeleteItem(cluster);//Gateway operation with write request(begin).
 //console.log(groups, 'rew11');alert(groups);
         gtw_curr_nod[0][5] = Math.max(gtw_curr_nod[0][5], t) + count_of_time_for_performance_local_action_with_meta_data;
         max_lag_of_performance_for_gateway_nodes = gtw_curr_nod[0][5] - t;
 		gw = gtw_curr_nod[0][5] - t;
-        groups = groups.concat(gtw_curr_nod); //Gateway operation with write request(finish). 
-//console.log(groups, cluster,'rew2',u,t);alert(groups);		 
-		 
+        cluster = cluster.concat(gtw_curr_nod); //Gateway operation with write request(finish). 
+//console.log(groups, cluster,'rew2',u,t);alert(groups);
 // iteration's part, write action:
 	     
 	      
@@ -425,30 +340,54 @@ w++;*/
 			    change_gossip_protocol = [['new' + t + '_' + u]];
                 
                 curr_ar = [];
+				groupsREZERV = [];
                 a = 0;
 		        r = 0;
                 j = 0;
+				
         while (j < n_value) {
             j = j + 1;
                 if (bound < 10) { 
                 curr_time_min = total_time_of_finish_imitatiion;
-                
-                for (i = 0; i < cluster.length; i++) {
-                    if (matrix[gtw_curr_nod[0][6]][cluster[i][6]] <= bound) {
-                        if (cluster[i][5] <= curr_time_min) {
-                            curr_time_min = cluster[i][5];
-                            i_min = i;
-                        }
-                    }
+                disk = 0.1;
+				
+                for (gr in groups) {
+                    if (groups[gr][2] > obj_current[key_of_bucket_or_needle][1]) {
+						
+					    
+
+                curr_nod = randomElectAndDeleteItem(groups[gr][4]);
+
+                groups[gr][4] = groups[gr][4].concat(curr_nod);
+                if (curr_nod[0][7] > obj_current[key_of_bucket_or_needle][1]) {
+					top = 0.01;
+					curr_nod[0][8] = top;
+					curr_nod[0][7] = curr_nod[0][7] - obj_current[key_of_bucket_or_needle][1];
+					groups[gr][2] = groups[gr][2] - obj_current[key_of_bucket_or_needle][1];
+					disk1 = 0;
+					//groupsREZERV.push(groups.splice(gr, 1));
+					break;
+				}				
                 }
-                curr_nod = cluster.splice([i_min],1);
-                i_min = undefined; 
-                }else{ 
-                     curr_nod = randomElectAndDeleteItem(cluster);
                 }
-                //pair = [gtw_curr_nod[0], curr_nod[0]];
+                if ( disk1) {
+					for (gr1 in groups) {
+						if (groups[gr1][3] < disk1) {
+							gr = gr1;
+							groups[gr1][3] = groups[gr1][3] + obj_current[key_of_bucket_or_needle][1];
+							disk = groups[gr1][3];
+							curr_nod = randomElectAndDeleteItem(groups[gr][4]);
+				            groups[gr][4] = groups[gr][4].concat(curr_nod);
+				            //groupsREZERV.push(groups.splice(gr, 1));
+						}
+				}
+				//curr_nod = groups[gr][4].splice([gr],1);
+				//groups[gr][4] = groups[gr][4].concat(curr_nod);
+				//groupsREZERV.push(groups.splice(gr, 1));
+				}
+				//pair = [gtw_curr_nod[0], curr_nod[0]];
                 //distance = {pair:[0.8, 1.5, 1.3]};
-                switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
+                switch (matrix[curr_nod[0][6][1]][gtw_curr_nod[0][6]]) {
                                 case 1:
                                     L++; 
                                     break;
@@ -464,7 +403,8 @@ w++;*/
                 if (rem_type) {
                     dist_of_pair = [rem[0][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[1][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[2][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]]];
                 }
-			    if(curr_nod[0]) {
+			    }
+				if(curr_nod[0]) {
 					
                     if (curr_nod[0][1]) {
 				
@@ -475,11 +415,12 @@ w++;*/
 							    if (randomElection([1, 0], [1 - p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3], p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3]])) {
                             curr_nod[0][2][key_of_bucket_or_needle] = t + '_' + u; //current_bucket_or_needle, put new Riak objeckt, or fresh information with same key value.
 			                curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
-							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
-							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
+							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4] * top) + dist_of_pair[0];//time for performance local action.
+							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);
+                            groups[gr][5] = curr_nod[0][5]; 							
 							change_gossip_protocol.push([curr_nod[0][0], 10, t +'_' + u]);//succesful write action for node.
 							gossip_protocol[2][key_of_bucket_or_needle][curr_nod[0][0]] = ['beginning: no commit ( < w_value ) value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u]];
-                            gossip_protocol[9][key_of_bucket_or_needle][curr_nod[0][0]] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u]];
+                            gossip_protocol[9][key_of_bucket_or_needle][groups[gr][0] + ',' + curr_nod[0][0]] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [t, u]];
                             //if(gossip_protocol[10][key_of_bucket_or_needle]) { 
 							gossip_protocol[10][key_of_bucket_or_needle][curr_nod[0][0]] = ['value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' , curr_nod[0][5], [-t, u], '-pair: add  --value = ' + t +'_' + u +'-' + current_bucket_or_needle[0] + '-and, then: -' ]; 
                            // }
@@ -499,7 +440,7 @@ w++;*/
 								rr = rr + 1;
 								r = r + 1; //p = p + 1;
                                 c = c + 1
-                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4] * top) + dist_of_pair[0];//time for performance local action.
 							    total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 							    change_gossip_protocol.push([curr_nod[0][0], 10, t +'_' + u]);//succesful write action for node.
 								change_gossip_protocol.push([curr_nod[0][0], 11, 0, t + '_' + u])
@@ -584,9 +525,12 @@ w++;*/
                 }//else{
 	                //c = c - 1;
 		       // }
-		        curr_ar = curr_ar.concat(curr_nod); 
+		        curr_ar = curr_ar.concat(curr_nod);
+                groupsREZERV = groupsREZERV.concat(groups.splice(gr, 1));
+                top = 1;	
 	        }
                 cluster = cluster.concat(curr_ar);
+				groups = groups.concat(groupsREZERV);
                  gossip_protocol[11][key_of_bucket_or_needle][0] = gossip_protocol[11][key_of_bucket_or_needle][0] + '__NEXT--'; 
 				gossip_protocol[1][key_of_bucket_or_needle].push('change_gossip_protocol: ' + change_gossip_protocol);
                 if (c < w_value ) {
@@ -608,8 +552,7 @@ w++;*/
 	            
             }else if (w_ac) {
 //main loop(oldKey)			
-            
-			    curr_nod = [];
+            //curr_nod = [];
                 key_of_bucket_or_needle = randomElection(list_of_entering_keys,  uniformDistrOf_n_Elem(list_of_entering_keys.length));  //key 0f  Raik object, which is coming.
 				
 				current_bucket_or_needle =  randomElection(metaRiak_objects, probabilities_selectings_of_metaRiak_objects); // value of Raik object, which is coming.
@@ -627,12 +570,18 @@ w++;*/
 				c = 0;
                 a = 0;
 			for (nod in gossip_protocol[2][key_of_bucket_or_needle]) {
-			    for (n = 0; n < cluster.length; n++) {
-                    if (cluster[n][0] === nod) {
-                        curr_nod[0] = cluster[n];
-					}
-				}
-                switch (matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]) {
+				 
+			    for (n = 0; n < number_of_Elliptics_groups; n++) {
+					for (nod1 in groups[n][4]) {
+                    if (nod1 === nod) {
+                     curr_nod = [groups[n][4][nod1]];
+					 curr_nod[0][8] = top;
+                     if(curr_nod[0][7] > current_bucket_or_needle[1]) {
+					 	top = 0.01;
+						curr_nod[0][8] = top;
+					 	curr_nod[0][7] = curr_nod[0][7] - current_bucket_or_needle[1]; 
+					 } 
+                switch (matrix[groups[n][4][nod1][6][1]][gtw_curr_nod[0][6]]) {
                                 case 1:
                                     L++; 
                                     break;
@@ -646,9 +595,12 @@ w++;*/
                                     Int++;
                             }   
                 if (rem_type) {
-                    dist_of_pair = [rem[0][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[1][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[2][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]]];
-                } 
-				if(curr_nod[0]) {
+                    dist_of_pair = [rem[0][matrix[groups[n][4][nod1][6][1]][gtw_curr_nod[0][6]]], rem[1][matrix[groups[n][4][nod1][6][1]][gtw_curr_nod[0][6]]], rem[2][matrix[groups[n][4][nod1][6][1]][gtw_curr_nod[0][6]]]];
+                }
+					}
+					}
+				}
+				
 					
                 if (curr_nod[0][1]) {
 				
@@ -659,7 +611,7 @@ w++;*/
 							if (randomElection([1, 0], [1 - p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3], p_of_local_failure * current_bucket_or_needle[3]/current_bucket_or_needle[3]])) {
                             curr_nod[0][2][key_of_bucket_or_needle] = t + '_' + u; //current_bucket_or_needle, put new Riak objeckt, or fresh information with same key value.
 			                curr_nod[0][3] = curr_nod[0][3] + current_bucket_or_needle[1]; //fresh information.
-							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+							curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4] * top) + dist_of_pair[0];//time for performance local action.
 							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 							change_gossip_protocol.push([curr_nod[0][0], 20, t +'_' + u]);//succesful write action for node.
 							
@@ -685,7 +637,7 @@ w++;*/
 								rr = rr + 1;
 								r = r + 1;
                                 c = c + 1;  //p = p + 1;
-                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4]) + dist_of_pair[0];//time for performance local action.
+                                curr_nod[0][5] = Math.max(curr_nod[0][5], gtw_curr_nod[0][5], t) + (use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4] * top) + dist_of_pair[0];//time for performance local action.
 							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,curr_nod[0][5]);	
 								change_gossip_protocol.push([curr_nod[0][0], 21, 0, t + '_' + u])
 								if(gossip_protocol[1][key_of_bucket_or_needle]) {
@@ -763,9 +715,10 @@ w++;*/
 						gossip_protocol[1][key_of_bucket_or_needle].push([curr_nod[0][0], 24, t + '_' + u]);
 								}
 		            //c = c - 1;
+		            top = 1;
                   }
                
-		        }
+		        
 		           
 		
         }
@@ -798,16 +751,19 @@ w++;*/
 			//gossip_protocol[6][key_of_bucket_or_needle] = [];
 			
         current_bucket_or_needle = obj_current[key_of_bucket_or_needle];
-		          
+		time = -1;          
         c1 = 0;
 	    s1 = 0, s2 = 0;
         q = 0, k = 0;
               		   
 		for (buck in gossip_protocol[2][key_of_bucket_or_needle]) {
 	        k++;
-            for (n = 0; n < cluster.length; n++) {
-                        if (cluster[n][0] === buck) {
-                            switch (matrix[cluster[n][6]][gtw_curr_nod[0][6]]) {
+            for (n = 0; n < number_of_Elliptics_groups; n++) {
+				for (nod in groups[n][4]) {
+//console.log(groups[n][0] + ',' + groups[n][4][nod][0] ,groups[n][4], 'ku',nod,'op', buck);					
+                        if (groups[n][0] + ',' + groups[n][4][nod][0] === buck) {
+							top =groups[n][4][nod][8];
+                            switch (matrix[groups[n][4][nod][6][1]][gtw_curr_nod[0][6]]) {
                                 case 1:
                                     L++; 
                                     break;
@@ -822,15 +778,17 @@ w++;*/
                             } 
   
                             if (rem_type) {
-                                dist_of_pair = [rem[0][matrix[cluster[n][6]][gtw_curr_nod[0][6]]], rem[1][matrix[cluster[n][6]][gtw_curr_nod[0][6]]], rem[2][matrix[cluster[n][6]][gtw_curr_nod[0][6]]]];
+                                dist_of_pair = [rem[0][matrix[groups[n][4][nod][6][1]][gtw_curr_nod[0][6]]], rem[1][matrix[groups[n][4][nod][6][1]][gtw_curr_nod[0][6]]], rem[2][matrix[groups[n][4][nod][6][1]][gtw_curr_nod[0][6]]]];
                             }                             
-                            cluster[n][5] = Math.max(cluster[n][5], gtw_curr_nod[0][5], t) +  use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4];//time for performance local action.
-							max_lag_of_performance_of_read_request = Math.max(max_lag_of_performance_of_read_request, cluster[n][5] - t);
-							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,cluster[n][5]);
+                            groups[n][4][nod][5] = Math.max(groups[n][4][nod][5], gtw_curr_nod[0][5], t) +  use_time_for_performance_local_action_with_one_cond_unit_of_data * current_bucket_or_needle[4] * top;//time for performance local action.
+							max_lag_of_performance_of_read_request = Math.max(max_lag_of_performance_of_read_request, groups[n][4][nod][5] - t);
+							total_time_of_finish_imitatiion = Math.max(total_time_of_finish_imitatiion,groups[n][4][nod][5]);
 							gossip_protocol[6][key_of_bucket_or_needle].push([cluster[n][0], cluster[n][5], current_bucket_or_needle[0], t + '_' + u]);
-							time = cluster[n][5];
+							time = groups[n][4][nod][5];
+//console.log(time,'hi');							
 						}		    	 	    
 					}
+			}
             //dist_of_pair = [rem[0][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[1][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]], rem[2][matrix[curr_nod[0][6]][gtw_curr_nod[0][6]]]]; 	
 		    if (randomElection([1, 0], [1 - (p_of_send_action * dist_of_pair[1]) * current_bucket_or_needle[3], (p_of_send_action * dist_of_pair[1]) * current_bucket_or_needle[3]])) {
 			    if (randomElection([1, 0], [1 - p_of_read_action * current_bucket_or_needle[3], p_of_read_action * current_bucket_or_needle[3]])) { //read_action finished right.
@@ -878,7 +836,7 @@ w++;*/
         }else{
 			count_of_right_read_action = count_of_right_read_action + 1;
 			if (count_of_iterations_for_algorithm * level_of_intensivity_of_requests < 101) {
-console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) )
+console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read action ' + s2 + ' from ' + s1 + ' at step ' + t + '_' + u + '-_- at ' + time.toFixed(3) );
             }
 			if (s2 < 1 ) {
                 
@@ -888,11 +846,11 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
 			}
 		}
 		    reply = undefined;
-			time = undefined;
+			time = -1; //undefined;
 			inform = undefined;
 		}
 }
-		if (t % interval_for_repair == interval_for_repair - 1) {
+		/*if (t % interval_for_repair == interval_for_repair - 1) {
 		            w++;
 					for (x in gossip_protocol[10]) {
 					    v1 =0;
@@ -970,10 +928,10 @@ console.log('reply to key ' + key_of_bucket_or_needle + ' is ',reply, '; read ac
                     total_use_of_resource_by_repair_action = total_use_of_resource_by_repair_action + use_of_resource_for_seaching_one_Riak_object_at_one_node * (gossip_protocol[1][x].length - 1);
                 }
   
-}
+}*/
 w++;
         }
-total_used_resource = total_used_resource + total_use_of_resource_by_repair_action;  
+//total_used_resource = total_used_resource + total_use_of_resource_by_repair_action;*/  
 //input part:   
    
    
@@ -998,7 +956,7 @@ total_used_resource = total_used_resource + total_use_of_resource_by_repair_acti
 		
 	    "count_of_read//write_actions - " + count_of_iterations_for_algorithm * level_of_intensivity_of_requests
 		]);*/
-     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, groups, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w);
+     console.log(gossip_protocol, 'con_gp_f',total_count_of_data / total_used_resource , (count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), ((count_of_iterations_for_algorithm * level_of_intensivity_of_requests) - count_of_read_lags) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests), 'write_new_actions = ' + w_ac, v, cluster, groups, max_lag_of_performance_for_gateway_nodes, 'L = ' + L, 'M = ' + M, 'G =' + G, 'Int =' + Int,'repair = ' + w, 'disk = ' + disk1);
    
 return [(total_count_of_data / total_used_resource).toFixed(3), (((count_of_iterations_for_algorithm * level_of_intensivity_of_requests - (count_of_read_failures +  count_of_write_failures)) / (count_of_iterations_for_algorithm * level_of_intensivity_of_requests)) * 100).toFixed(3),  (((count_of_right_read_action - count_of_read_lags) / count_of_right_read_action) * 100).toFixed(3), total_count_of_data.toPrecision(4), total_used_resource.toPrecision(4), total_count_of_failures, count_of_read_lags, count_of_read_failures, count_of_write_failures, max_lag_of_performance_of_read_request.toFixed(3), count_of_iterations_for_algorithm * level_of_intensivity_of_requests, gw]    
 }
